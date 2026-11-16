@@ -149,6 +149,24 @@ function tipText(t) {
   if (S.meals.some((m) => m.purine_level === "high")) tips.push("Hoy hay una comida alta en purinas (cuida el ácido úrico).");
   return tips.length ? tips.join(" ") : "Vas por buen camino.";
 }
+function goalsList() {
+  const g = S.profile, t = totals(), d = S.daily || {}, h = d.habits || {}, has = S.meals.length > 0;
+  return [
+    ["Calorías en rango", has && t.kcal <= g.goal_kcal && t.kcal >= g.goal_kcal * 0.85],
+    ["Proteína", t.p >= g.goal_protein * 0.95],
+    ["Sodio bajo el tope", has && t.na <= g.goal_sodium_mg],
+    ["Pasos", (d.steps || 0) >= g.goal_steps],
+    ["Caminata en ayunas", !!h.walk],
+    ["Agua", !!h.hydration],
+    ["Medicación", !!h.meds],
+    ["Sueño 7 h o más", (d.sleep_minutes || 0) >= 420],
+  ];
+}
+function goalsHTML() {
+  const l = goalsList(), ok = l.filter((x) => x[1]).length;
+  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b></div>
+    <div class="grid grid-cols-2 gap-1 text-xs">${l.map(([n, v]) => `<div class="rounded-lg px-2 py-1 ${v ? "bg-green-900 text-green-200" : "bg-slate-900 text-slate-300"}">${v ? "✓" : "✗"} ${n}</div>`).join("")}</div></div>`;
+}
 function counterHTML() {
   const g = S.profile, t = totals();
   return `<div class="card space-y-3" id="counter">
@@ -158,7 +176,7 @@ function counterHTML() {
     ${macroRow("Carbohidratos", t.c, g.goal_carbs, " g", "#f97316")}
     ${macroRow("Grasas", t.f, g.goal_fat, " g", "#eab308")}
     <div class="flex justify-between text-xs text-slate-300"><span>Sodio ${Math.round(t.na)} / ${g.goal_sodium_mg} mg</span></div>
-    <p class="text-sm italic text-slate-200 border-t border-slate-700 pt-2">${esc(tipText(t))}</p></div>`;
+    ${goalsHTML()}<p class="text-sm italic text-slate-200 border-t border-slate-700 pt-2">${esc(tipText(t))}</p></div>`;
 }
 const refreshCounter = () => { const c = $("#counter"); if (c) c.outerHTML = counterHTML(); };
 
@@ -193,6 +211,12 @@ async function viewHoy() {
         ${["Ninguno", "Rutina A", "Rutina B"].map((x) => `<label class="flex items-center gap-3"><input type="radio" name="tr" value="${x}" ${tr === x ? "checked" : ""} style="width:1.4rem;height:1.4rem"><span>${x === "Ninguno" ? "Descanso" : x}</span></label>`).join("")}
       </div>
     </div>
+    <div class="card space-y-3"><h2 class="font-bold text-indigo-300">Sueño</h2>
+      <p class="text-xs text-slate-400">Se rellena solo si mandas la captura de Huawei Health al bot. También puedes escribirlo.</p>
+      <div class="grid grid-cols-3 gap-3">
+        <div><label class="block text-xs text-slate-300 mb-1">Horas</label><input id="s-hours" inputmode="decimal" class="inp" value="${d.sleep_minutes ? r1(d.sleep_minutes / 60) : ""}"></div>
+        <div><label class="block text-xs text-slate-300 mb-1">Puntuación</label><input id="s-score" inputmode="numeric" class="inp" value="${d.sleep_score ?? ""}"></div>
+        <div><label class="block text-xs text-slate-300 mb-1">FC reposo</label><input id="s-hr" inputmode="numeric" class="inp" value="${d.resting_hr ?? ""}"></div></div></div>
     <button id="save-day" class="btn bg-green-600 w-full text-lg py-4">Guardar el día</button></section>`;
 
   $("#date").onchange = (e) => { S.date = e.target.value || todayStr(); viewHoy(); };
@@ -209,11 +233,17 @@ async function saveDay() {
     if (S.fitRaw) metric.raw = S.fitRaw;
     if (any) await q(sb.from("body_metrics").upsert(metric, { onConflict: "user_id,date" }));
     const daily = {
-      user_id: uid, date, steps: num($("#steps").value),
+      user_id: uid, date,
       habits: { walk: $("#h-walk").checked, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked },
       training: $("input[name=tr]:checked").value,
     };
+    const stp = num($("#steps").value), sh = num($("#s-hours").value), ss = num($("#s-score").value), hr = num($("#s-hr").value);
+    if (stp != null) daily.steps = stp;
+    if (sh != null) daily.sleep_minutes = Math.round(sh * 60);
+    if (ss != null) daily.sleep_score = ss;
+    if (hr != null) daily.resting_hr = hr;
     await q(sb.from("daily_logs").upsert(daily, { onConflict: "user_id,date" }));
+    S.daily = { ...(S.daily || {}), ...daily }; refreshCounter();
     S.fitSource = "manual"; S.fitRaw = null;
     toast("Día guardado en la nube", "ok");
   } catch (e) { toast("No se guardó: " + e.message, "err", 6000); }
@@ -533,11 +563,13 @@ async function viewProgreso() {
     if (days >= 5) { const wk = ((l.weight_kg - f.weight_kg) / days) * 7, pct = (wk / f.weight_kg) * 100; pace = `Ritmo: ${r1(wk)} kg/sem (${r1(pct)} %/sem). ${pct < -1 ? "Más de 1 % semanal: referencia habitual para no perder músculo. Revisa proteína y fuerza." : "Dentro de lo habitual."}`; }
   }
   const warn = dM != null && dM < -1.5 ? `<div class="bg-red-900 border border-red-500 rounded-xl p-3 text-sm">Has perdido ${Math.abs(dM)} kg de masa muscular desde el inicio. Prioriza proteína y las dos rutinas.</div>` : "";
+  const sl = daily.filter((x) => x.sleep_minutes).slice(-7);
+  const sleepCard = sl.length ? `<div class="card text-sm">Sueño (últimos ${sl.length} días): <b>${r1(sl.reduce((a, x) => a + x.sleep_minutes, 0) / sl.length / 60)} h</b> de media${sl.some((x) => x.sleep_score) ? ` · puntuación ${Math.round(sl.filter((x) => x.sleep_score).reduce((a, x) => a + x.sleep_score, 0) / sl.filter((x) => x.sleep_score).length)}` : ""}</div>` : "";
   const stat = (l, v, good) => `<div class="card text-center"><p class="text-xs uppercase text-slate-300">${l}</p><p class="text-2xl font-bold ${good ? "text-green-400" : "text-red-400"}">${v}</p></div>`;
   $("#view").innerHTML = `<section class="space-y-4">
     <p class="text-xs text-slate-400">Desde ${fdate(a.date)} hasta ${fdate(b.date)} · Actual ${b.weight_kg} kg</p>
     <div class="grid grid-cols-2 gap-3">${stat("Peso", sgn(dW, " kg"), dW <= 0)}${stat("Músculo", sgn(dM, " kg"), dM == null || dM >= -0.5)}${stat("Grasa %", sgn(dFp, " pt"), dFp == null || dFp <= 0)}${stat("Grasa kg", sgn(dFk, " kg"), dFk == null || dFk <= 0)}</div>
-    <div class="card text-sm">Músculo conservado: <b>${keep ?? "-"} %</b>. ${esc(pace)}</div>${warn}
+    <div class="card text-sm">Músculo conservado: <b>${keep ?? "-"} %</b>. ${esc(pace)}</div>${warn}${sleepCard}
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Peso y músculo</h3><div class="h-56"><canvas id="c1"></canvas></div></div>
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Grasa corporal %</h3><div class="h-44"><canvas id="c2"></canvas></div></div>
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Calorías y proteína (14 días)</h3><div class="h-52"><canvas id="c3"></canvas></div></div>
