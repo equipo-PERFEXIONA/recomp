@@ -5,8 +5,8 @@ export function createEvolucion(ctx) {
   const q = async (p) => { const { data, error } = await p; if (error) throw error; return data; };
 
   const ANG = [["front", "Frente"], ["side_r", "Perfil derecho"], ["back", "Espalda"], ["side_l", "Perfil izquierdo"]];
-  const MEAS = [["neck_cm", "Cuello"], ["biceps_l_cm", "Bíceps izq"], ["biceps_r_cm", "Bíceps der"], ["quad_l_cm", "Cuádriceps izq"], ["quad_r_cm", "Cuádriceps der"]];
-  const COLORS = ["#f59e0b", "#3b82f6", "#60a5fa", "#22c55e", "#4ade80"];
+  const MEAS = [["neck_cm", "Cuello"], ["biceps_l_cm", "Bíceps izq"], ["biceps_r_cm", "Bíceps der"], ["quad_l_cm", "Cuádriceps izq"], ["quad_r_cm", "Cuádriceps der"], ["waist_cm", "Ombligo"]];
+  const COLORS = ["#f59e0b", "#3b82f6", "#60a5fa", "#22c55e", "#4ade80", "#ef4444"];
 
   let rows = [];
   let urls = {};
