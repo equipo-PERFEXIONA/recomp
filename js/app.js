@@ -625,10 +625,13 @@ async function viewProgresoBase() {
   const warn = dM != null && dM < -1.5 ? `<div class="bg-red-900 border border-red-500 rounded-xl p-3 text-sm">Has perdido ${Math.abs(dM)} kg de masa muscular desde el inicio. Prioriza proteína y las dos rutinas.</div>` : "";
   const sl = daily.filter((x) => x.sleep_minutes).slice(-7);
   const sleepCard = sl.length ? `<div class="card text-sm">Sueño (${sl.length === 1 ? "último día" : "últimos " + sl.length + " días"}): <b>${r1(sl.reduce((a, x) => a + x.sleep_minutes, 0) / sl.length / 60)} h</b> de media${sl.some((x) => x.sleep_score) ? ` · puntuación ${Math.round(sl.filter((x) => x.sleep_score).reduce((a, x) => a + x.sleep_score, 0) / sl.filter((x) => x.sleep_score).length)}` : ""}</div>` : "";
-  const stat = (l, v, good) => `<div class="card text-center"><p class="text-xs uppercase text-slate-300">${l}</p><p class="text-2xl font-bold ${good ? "text-green-400" : "text-red-400"}">${v}</p></div>`;
+  // Valor actual siempre visible; el cambio aparece debajo y solo cuando hay con qué comparar.
+  const stat = (l, cur, unit, chg, good) => `<div class="card text-center"><p class="text-xs uppercase text-slate-300">${l}</p>
+    <p class="text-2xl font-bold text-white">${cur != null ? cur : "—"}<span class="text-sm font-normal text-slate-400"> ${cur != null ? unit : ""}</span></p>
+    <p class="text-xs ${chg == null || a === b ? "text-slate-500" : good ? "text-green-400" : "text-red-400"}">${chg == null || a === b ? "sin cambios aún" : "cambio " + (chg > 0 ? "+" : "") + chg + " " + unit}</p></div>`;
   $("#view").innerHTML = `<section class="space-y-4">
     <p class="text-xs text-slate-400">Desde ${fdate(a.date)} hasta ${fdate(b.date)} · Actual ${b.weight_kg} kg</p>
-    <div class="grid grid-cols-2 gap-3">${stat("Peso", sgn(dW, " kg"), dW <= 0)}${stat("Músculo", sgn(dM, " kg"), dM == null || dM >= -0.5)}${stat("Grasa %", sgn(dFp, " pt"), dFp == null || dFp <= 0)}${stat("Grasa kg", sgn(dFk, " kg"), dFk == null || dFk <= 0)}</div>
+    <div class="grid grid-cols-2 gap-3">${stat("Peso", b.weight_kg, "kg", dW, dW <= 0)}${stat("Músculo", b.muscle_kg, "kg", dM, dM == null || dM >= -0.5)}${stat("Grasa %", b.body_fat_pct, "%", dFp, dFp == null || dFp <= 0)}${stat("Grasa kg", b.fat_mass_kg, "kg", dFk, dFk == null || dFk <= 0)}</div>
     <div class="card text-sm">Músculo conservado: <b>${keep ?? "-"} %</b>. ${esc(pace)}</div>${warn}${sleepCard}
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Peso y músculo</h3><div class="h-56"><canvas id="c1"></canvas></div></div>
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Grasa corporal %</h3><div class="h-44"><canvas id="c2"></canvas></div></div>
