@@ -35,14 +35,18 @@ export function createEvolucion(ctx) {
     } catch (e) { toast("No se pudo cargar: " + e.message, "err", 6000); rows = []; }
 
     const isMonday = new Date().getDay() === 1;
-    const hasThisWeek = rows.some((r) => r.date === lastMonday());
+    const dayDiff = (d) => Math.round((new Date(todayStr()) - new Date(d)) / 864e5);
+    const hasThisWeek = rows.some((r) => dayDiff(r.date) >= 0 && dayDiff(r.date) <= 6);
+    // Si ya hay un registro de los últimos 6 días (aunque sea de otro día), el formulario abre sobre ese.
+    const recent = [...rows].reverse().find((r) => dayDiff(r.date) >= 0 && dayDiff(r.date) <= 6);
+    const startDate = recent ? recent.date : lastMonday();
     const banner = isMonday && !hasThisWeek ? `<div class="bg-amber-900 border border-amber-500 rounded-xl p-3 text-sm">Hoy es lunes: toca foto y medidas.</div>` : "";
 
     $("#view").innerHTML = `<section class="space-y-4">
       ${banner}
       <div class="card space-y-3">
         <h2 class="font-bold text-pink-300">Registro semanal</h2>
-        <div><label class="block text-xs text-slate-300 mb-1">Fecha (lunes)</label><input type="date" id="e-date" class="inp" value="${lastMonday()}"></div>
+        <div><label class="block text-xs text-slate-300 mb-1">Fecha (lunes)</label><input type="date" id="e-date" class="inp" value="${startDate}"></div>
         <div class="grid grid-cols-2 gap-3">${MEAS.map(([k, l]) => `<div><label class="block text-xs text-slate-300 mb-1">${l} (cm)</label><input id="e-${k}" inputmode="decimal" class="inp"></div>`).join("")}</div>
         <div class="grid grid-cols-2 gap-3">${ANG.map(([a, l]) => `<div><div class="text-xs text-slate-300 mb-1">${l}</div>
           <label class="block cursor-pointer"><div id="e-box-${a}">${imgTag(null, "rounded-xl w-full h-44 object-cover bg-slate-900")}</div>

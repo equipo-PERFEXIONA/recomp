@@ -3,6 +3,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from "./config.js";
 import { EXERCISES, ROUTINES, GENERAL_RULES, imgUrl, ytUrl } from "./exercises.js";
 import { createEvolucion } from "./evolucion.js";
 import { createSemana } from "./semana.js";
+import { createPanel } from "./panel.js";
 
 /* ---------- utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -125,6 +126,7 @@ const totals = () => S.meals.reduce((a, m) => ({ kcal: a.kcal + +m.kcal, p: a.p 
 /* ---------- navegacion ---------- */
 const evo = createEvolucion({ sb, S, esc, num, r1, fdate, todayStr, toast, prepImage });
 const semana = createSemana({ sb, S, esc, r1, fdate });
+const panel = createPanel({ sb, S, esc });
 const VIEWS = { hoy: viewHoy, comida: viewComida, fuerza: viewFuerza, evolucion: () => evo.view(), progreso: viewProgreso, ajustes: viewAjustes };
 $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) go(b.dataset.tab); });
 async function go(tab) {
@@ -249,6 +251,12 @@ async function viewHoy() {
         <div><label class="block text-xs text-slate-300 mb-1">Horas</label><input id="s-hours" inputmode="decimal" class="inp" value="${d.sleep_minutes ? r1(d.sleep_minutes / 60) : ""}"></div>
         <div><label class="block text-xs text-slate-300 mb-1">Puntuación</label><input id="s-score" inputmode="numeric" class="inp" value="${d.sleep_score ?? ""}"></div>
         <div><label class="block text-xs text-slate-300 mb-1">FC reposo</label><input id="s-hr" inputmode="numeric" class="inp" value="${d.resting_hr ?? ""}"></div></div></div>
+    <div class="card space-y-3"><h2 class="font-bold text-red-300">❤️ Presión arterial</h2>
+      <p class="text-xs text-slate-400">Al levantarte y al acostarte. También puedes mandar la captura de Huawei Health al bot.</p>
+      ${[["am", "Al levantarte"], ["pm", "Al acostarte"]].map(([m, l]) => `<div><div class="text-xs text-slate-300 mb-1">${l}</div><div class="grid grid-cols-3 gap-2">
+        <input id="b-${m}-s" inputmode="numeric" placeholder="Sistólica" class="inp !p-2" value="${d["bp_" + m + "_sys"] ?? ""}">
+        <input id="b-${m}-d" inputmode="numeric" placeholder="Diastólica" class="inp !p-2" value="${d["bp_" + m + "_dia"] ?? ""}">
+        <input id="b-${m}-p" inputmode="numeric" placeholder="Pulso" class="inp !p-2" value="${d["bp_" + m + "_pulse"] ?? ""}"></div></div>`).join("")}</div>
     <button id="save-day" class="btn bg-green-600 w-full text-lg py-4">Guardar el día</button></section>`;
 
   $("#date").onchange = (e) => { S.date = e.target.value || todayStr(); viewHoy(); };
@@ -279,6 +287,11 @@ async function saveDay() {
     if (sh != null) daily.sleep_minutes = Math.round(sh * 60);
     if (ss != null) daily.sleep_score = ss;
     if (hr != null) daily.resting_hr = hr;
+    for (const m of ["am", "pm"]) {
+      const sy = num($(`#b-${m}-s`).value), di = num($(`#b-${m}-d`).value), pu = num($(`#b-${m}-p`).value);
+      if (sy != null && di != null) { daily[`bp_${m}_sys`] = Math.round(sy); daily[`bp_${m}_dia`] = Math.round(di); }
+      if (pu != null) daily[`bp_${m}_pulse`] = Math.round(pu);
+    }
     await q(sb.from("daily_logs").upsert(daily, { onConflict: "user_id,date" }));
     S.daily = { ...(S.daily || {}), ...daily }; refreshCounter();
     S.fitSource = "manual"; S.fitRaw = null;
@@ -579,7 +592,8 @@ function startRest(sec) {
 }
 
 /* ---------- vista PROGRESO ---------- */
-async function viewProgreso() {
+async function viewProgreso() { await viewProgresoBase(); await panel.mount(); }
+async function viewProgresoBase() {
   $("#view").innerHTML = `<p class="text-slate-400 p-4">Cargando…</p>`;
   let metrics = [], daily = [], mealsAgg = {};
   try {
@@ -598,7 +612,7 @@ async function viewProgreso() {
   if (!W.length) { $("#view").innerHTML = `<div class="card">Aún no hay mediciones. Guarda la primera en Hoy o usa "Cargar medición inicial" en Ajustes.</div>`; return; }
   const a = W[0], b = W[W.length - 1];
   const diff = (k) => (a[k] != null && b[k] != null ? r1(b[k] - a[k]) : null);
-  const sgn = (v, u = "") => (v == null ? "-" : `${v > 0 ? "+" : ""}${v}${u}`);
+  const sgn = (v, u = "") => (v == null || a === b ? "—" : `${v > 0 ? "+" : ""}${v}${u}`);
   const dW = diff("weight_kg"), dM = diff("muscle_kg"), dFp = diff("body_fat_pct"), dFk = diff("fat_mass_kg");
   const keep = a.muscle_kg && b.muscle_kg ? r1((b.muscle_kg / a.muscle_kg) * 100) : null;
   // ritmo semanal sobre los ultimos 14 dias
@@ -610,7 +624,7 @@ async function viewProgreso() {
   }
   const warn = dM != null && dM < -1.5 ? `<div class="bg-red-900 border border-red-500 rounded-xl p-3 text-sm">Has perdido ${Math.abs(dM)} kg de masa muscular desde el inicio. Prioriza proteína y las dos rutinas.</div>` : "";
   const sl = daily.filter((x) => x.sleep_minutes).slice(-7);
-  const sleepCard = sl.length ? `<div class="card text-sm">Sueño (últimos ${sl.length} días): <b>${r1(sl.reduce((a, x) => a + x.sleep_minutes, 0) / sl.length / 60)} h</b> de media${sl.some((x) => x.sleep_score) ? ` · puntuación ${Math.round(sl.filter((x) => x.sleep_score).reduce((a, x) => a + x.sleep_score, 0) / sl.filter((x) => x.sleep_score).length)}` : ""}</div>` : "";
+  const sleepCard = sl.length ? `<div class="card text-sm">Sueño (${sl.length === 1 ? "último día" : "últimos " + sl.length + " días"}): <b>${r1(sl.reduce((a, x) => a + x.sleep_minutes, 0) / sl.length / 60)} h</b> de media${sl.some((x) => x.sleep_score) ? ` · puntuación ${Math.round(sl.filter((x) => x.sleep_score).reduce((a, x) => a + x.sleep_score, 0) / sl.filter((x) => x.sleep_score).length)}` : ""}</div>` : "";
   const stat = (l, v, good) => `<div class="card text-center"><p class="text-xs uppercase text-slate-300">${l}</p><p class="text-2xl font-bold ${good ? "text-green-400" : "text-red-400"}">${v}</p></div>`;
   $("#view").innerHTML = `<section class="space-y-4">
     <p class="text-xs text-slate-400">Desde ${fdate(a.date)} hasta ${fdate(b.date)} · Actual ${b.weight_kg} kg</p>
