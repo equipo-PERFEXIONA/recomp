@@ -13,6 +13,10 @@ const fdate = (s) => { const [y, m, d] = s.split("-"); return `${d}/${m}/${y.sli
 const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sin almacenamiento */ } };
 
+// Al cerrar sesion o cambiar de usuario se borra todo lo guardado en el navegador (copias y sesiones de fuerza).
+function clearLocal() {
+  try { Object.keys(localStorage).filter((k) => k.startsWith("cache_hist") || k.startsWith("sess_")).forEach((k) => localStorage.removeItem(k)); } catch { /* ok */ }
+}
 function toast(msg, type = "info", ms = 3500) {
   const t = document.createElement("div");
   const bg = type === "ok" ? "bg-green-900 border-green-500" : type === "err" ? "bg-red-900 border-red-500" : "bg-slate-800 border-slate-500";
@@ -75,6 +79,7 @@ $("#auth-up").addEventListener("click", async () => {
 sb.auth.onAuthStateChange((_ev, session) => {
   const u = session?.user ?? null;
   if (u && S.user?.id === u.id) return;
+  if (S.user && (!u || u.id !== S.user.id)) clearLocal();
   S.user = u;
   if (u) start(); else showAuth();
 });
@@ -286,10 +291,23 @@ for (const id of ["#file-meal", "#file-meal-gal"]) {
     try { const img = await prepImage(f); runMeal({ img, note: ($("#m-text")?.value || "").trim() }); } catch (err) { toast(err.message, "err"); }
   });
 }
+// Nunca confiamos en la forma de la respuesta de la IA: se fuerzan numeros y listas.
+function cleanMeal(d) {
+  const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const items = (Array.isArray(d?.items) ? d.items : []).map((i) => ({
+    name: String(i?.name ?? ""), grams: n(i?.grams), kcal: n(i?.kcal), protein_g: n(i?.protein_g), carbs_g: n(i?.carbs_g), fat_g: n(i?.fat_g), sodium_mg: n(i?.sodium_mg),
+  }));
+  const ok = (v, list, def) => (list.includes(v) ? v : def);
+  return {
+    name: String(d?.name ?? "Comida"), meal_type: ok(d?.meal_type, ["Desayuno", "Comida", "Merienda", "Cena", "Snack"], "Comida"),
+    items, kcal: n(d?.kcal), protein_g: n(d?.protein_g), carbs_g: n(d?.carbs_g), fat_g: n(d?.fat_g), sodium_mg: n(d?.sodium_mg),
+    purine_level: ok(d?.purine_level, ["low", "medium", "high"], null), confidence: ok(d?.confidence, ["low", "medium", "high"], "low"), notes: String(d?.notes ?? ""),
+  };
+}
 async function runMeal({ img = null, note = "" }) {
   $("#m-busy")?.classList.remove("hidden");
   try {
-    const d = await analyze("meal", { b64: img?.b64, mime: img?.mime, note });
+    const d = cleanMeal(await analyze("meal", { b64: img?.b64, mime: img?.mime, note }));
     S.draft = { ...d, img, source: img ? "photo" : "text", mult: 1, base: { kcal: d.kcal, p: d.protein_g, c: d.carbs_g, f: d.fat_g, na: d.sodium_mg } };
     renderDraft();
   } catch (e) { toast("Análisis falló: " + e.message, "err", 6000); }
@@ -311,7 +329,7 @@ function renderDraft() {
       <select id="d-type" class="inp">${types.map((t) => `<option ${t === d.meal_type ? "selected" : ""}>${t}</option>`).join("")}</select>
       <select id="d-mult" class="inp">${[0.5, 0.75, 1, 1.25, 1.5, 2].map((x) => `<option value="${x}" ${x === d.mult ? "selected" : ""}>Porción x${x}</option>`).join("")}</select></div>
     <div class="grid grid-cols-5 gap-2 text-center text-xs">
-      ${[["kcal", "kcal", d.kcal], ["p", "Prot", d.protein_g], ["c", "Carb", d.carbs_g], ["f", "Grasa", d.fat_g], ["na", "Na mg", d.sodium_mg]].map(([k, l, v]) => `<div><label>${l}</label><input id="d-${k}" inputmode="decimal" class="inp text-center !px-1" value="${v ?? 0}"></div>`).join("")}</div>
+      ${[["kcal", "kcal", d.kcal], ["p", "Prot", d.protein_g], ["c", "Carb", d.carbs_g], ["f", "Grasa", d.fat_g], ["na", "Na mg", d.sodium_mg]].map(([k, l, v]) => `<div><label>${l}</label><input id="d-${k}" inputmode="decimal" class="inp text-center !px-1" value="${esc(num(v) ?? 0)}"></div>`).join("")}</div>
     <div class="grid grid-cols-2 gap-2"><button id="d-ok" class="btn bg-green-600">Guardar comida</button><button id="d-no" class="btn bg-slate-600">Descartar</button></div></div>`;
   $("#d-mult").onchange = (e) => {
     const m = +e.target.value; d.mult = m;
@@ -389,7 +407,7 @@ function mediaHTML(id, ex) {
   }
   return `<div class="flip"><img src="${imgUrl(ex.media, 0)}" alt="${esc(ex.name)}" loading="lazy"><img class="b" src="${imgUrl(ex.media, 1)}" alt="" loading="lazy"></div>`;
 }
-function sessionKey(r) { return `sess_${r}_${S.date}`; }
+function sessionKey(r) { return `sess_${S.user.id}_${r}_${S.date}`; }
 function viewFuerza() {
   const R = ROUTINES[S.routine];
   const saved = lsGet(sessionKey(S.routine), {});
@@ -497,8 +515,8 @@ async function viewProgreso() {
     ]);
     metrics = m; daily = d;
     ml.forEach((x) => { const a = (mealsAgg[x.log_date] ||= { kcal: 0, p: 0 }); a.kcal += +x.kcal; a.p += +x.protein_g; });
-    lsSet("cache_hist", { metrics, daily, mealsAgg });
-  } catch (e) { const c = lsGet("cache_hist", null); if (c) ({ metrics, daily, mealsAgg } = c); toast("Sin conexión: mostrando la última copia", "err"); }
+    lsSet(`cache_hist_${S.user.id}`, { metrics, daily, mealsAgg });
+  } catch (e) { const c = lsGet(`cache_hist_${S.user.id}`, null); if (c) ({ metrics, daily, mealsAgg } = c); toast("Sin conexión: mostrando la última copia", "err"); }
 
   const W = metrics.filter((x) => x.weight_kg != null);
   if (!W.length) { $("#view").innerHTML = `<div class="card">Aún no hay mediciones. Guarda la primera en Hoy o usa "Cargar medición inicial" en Ajustes.</div>`; return; }
@@ -576,7 +594,7 @@ function viewAjustes() {
   };
   $("#imp").onclick = () => $("#file-import").click();
   $("#upd").onclick = async () => { try { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); for (const k of await caches.keys()) await caches.delete(k); } catch { /* ok */ } location.reload(); };
-  $("#out").onclick = async () => { await sb.auth.signOut(); S.user = null; showAuth(); };
+  $("#out").onclick = async () => { await sb.auth.signOut(); clearLocal(); S.user = null; showAuth(); };
 }
 $("#file-import").addEventListener("change", async (e) => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
