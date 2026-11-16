@@ -364,7 +364,27 @@ async function viewComida() {
             <div><label>Prot</label><input id="man-p" inputmode="decimal" class="inp text-center !px-1"></div>
             <div><label>Carb</label><input id="man-c" inputmode="decimal" class="inp text-center !px-1"></div>
             <div><label>Grasa</label><input id="man-f" inputmode="decimal" class="inp text-center !px-1"></div></div>
-          <button id="man-ok" class="btn bg-green-600 w-full">Agregar comida</button></div></details>
+          <button id="man-ok" class="btn bg-green-600 w-full">Agregar comida</button></div>
+        <div class="space-y-2 mt-4 pt-3 border-t border-slate-700">
+          <div class="text-sm font-semibold text-green-300">Etiqueta nutricional</div>
+          <p class="text-xs text-slate-400">Foto de la tabla del envase. Pon la cantidad que comes y se calcula solo.</p>
+          <label class="btn bg-slate-700 block text-center cursor-pointer text-sm">📷 Foto de la etiqueta<input type="file" accept="image/*" id="lab-file" class="hidden"></label>
+          <p id="lab-busy" class="text-xs text-amber-300 hidden">Leyendo la etiqueta…</p>
+          <input id="lab-name" class="inp" placeholder="Producto">
+          <div class="text-xs text-slate-300">Valores por 100 g o 100 ml</div>
+          <div class="grid grid-cols-5 gap-2 text-center text-xs">
+            <div><label>kcal</label><input id="lab-kcal" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Prot</label><input id="lab-p" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Carb</label><input id="lab-c" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Grasa</label><input id="lab-f" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Na mg</label><input id="lab-na" inputmode="decimal" class="inp text-center !px-1"></div></div>
+          <p id="lab-warn" class="text-xs text-amber-300 hidden">La etiqueta solo traía valores por porción y no vi el peso de la porción: revisa los números.</p>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div><label>Cantidad (g o ml)</label><input id="lab-qty" inputmode="decimal" class="inp" placeholder="150"></div>
+            <div><label>o porciones <span id="lab-serv-txt" class="text-slate-400"></span></label><input id="lab-por" inputmode="decimal" class="inp" placeholder="1"></div></div>
+          <div id="lab-total" class="text-sm bg-slate-800 rounded-lg p-2">Total: escribe la cantidad</div>
+          <select id="lab-type" class="inp">${["Desayuno", "Comida", "Merienda", "Cena", "Snack"].map((t) => `<option>${t}</option>`).join("")}</select>
+          <button id="lab-add" class="btn bg-green-600 w-full">Agregar con esta cantidad</button></div></details>
       <p id="m-busy" class="text-sm text-amber-300 hidden">Analizando con IA…</p>
     </div>
     <div id="draft"></div>
@@ -377,6 +397,7 @@ async function viewComida() {
   $("#m-cam").onclick = () => $("#file-meal").click();
   $("#m-gal").onclick = () => $("#file-meal-gal").click();
   $("#man-ok").onclick = addManual;
+  bindLabel();
   $("#m-txt").onclick = () => { const t = $("#m-text").value.trim(); if (t) runMeal({ note: t }); else toast("Escribe qué comiste."); };
   $("#menu-day").onchange = renderMenu;
 }
@@ -528,6 +549,47 @@ async function addDirect(type, name, m) {
     renderMeals(); refreshCounter();
     toast(`Agregado: ${Math.round(m.kcal || 0)} kcal · ${Math.round(m.p || 0)} g proteína`, "ok");
   } catch (e) { toast("No se agregó: " + e.message, "err", 6000); }
+}
+/* ---------- Etiqueta nutricional: foto + cantidad ---------- */
+let labServ = 0;
+function labTotals() {
+  const per = { kcal: num($("#lab-kcal").value) || 0, p: num($("#lab-p").value) || 0, c: num($("#lab-c").value) || 0, f: num($("#lab-f").value) || 0, na: num($("#lab-na").value) || 0 };
+  const qty = num($("#lab-qty").value) || 0, k = qty / 100;
+  return { qty, kcal: per.kcal * k, p: per.p * k, c: per.c * k, f: per.f * k, na: per.na * k };
+}
+function labShow() {
+  const t = labTotals();
+  $("#lab-total").textContent = t.qty > 0 ? `Total ${Math.round(t.qty)} g: ${Math.round(t.kcal)} kcal · ${r1(t.p)} P · ${r1(t.c)} C · ${r1(t.f)} G · ${Math.round(t.na)} mg sodio` : "Total: escribe la cantidad";
+}
+function bindLabel() {
+  ["#lab-kcal", "#lab-p", "#lab-c", "#lab-f", "#lab-na", "#lab-qty"].forEach((id) => $(id).addEventListener("input", labShow));
+  $("#lab-por").addEventListener("input", () => { const n = num($("#lab-por").value); if (n != null && labServ > 0) { $("#lab-qty").value = r1(n * labServ); labShow(); } });
+  $("#lab-file").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    $("#lab-busy").classList.remove("hidden");
+    try {
+      const img = await prepImage(f, 1800, 0.9);
+      const d = await analyze("label", { b64: img.b64, mime: img.mime });
+      const p = d.per100 || {};
+      $("#lab-name").value = d.product_name || $("#lab-name").value;
+      $("#lab-kcal").value = p.kcal ?? ""; $("#lab-p").value = p.p ?? ""; $("#lab-c").value = p.c ?? ""; $("#lab-f").value = p.f ?? ""; $("#lab-na").value = p.na ?? "";
+      labServ = Number(d.serving_g) > 0 ? Number(d.serving_g) : 0;
+      $("#lab-serv-txt").textContent = labServ ? `(1 = ${labServ} g)` : "";
+      $("#lab-warn").classList.toggle("hidden", !d.unreliable);
+      labShow();
+      toast("Etiqueta leída. Pon la cantidad.", "ok");
+    } catch (err) { toast("No pude leer la etiqueta: " + err.message, "err", 6000); }
+    $("#lab-busy").classList.add("hidden");
+  });
+  $("#lab-add").onclick = async () => {
+    const t = labTotals();
+    if (!(t.qty > 0)) { toast("Escribe la cantidad que comiste."); return; }
+    if (!(t.kcal > 0)) { toast("Faltan las calorías por 100 g."); return; }
+    const name = ($("#lab-name").value.trim() || "Producto") + ` (${Math.round(t.qty)} g)`;
+    await addDirect($("#lab-type").value, name, { kcal: Math.round(t.kcal), p: r1(t.p), c: r1(t.c), f: r1(t.f), na: Math.round(t.na), pur: null });
+    ["#lab-qty", "#lab-por"].forEach((id) => { $(id).value = ""; }); labShow();
+  };
 }
 async function addManual() {
   const name = $("#man-name").value.trim();
