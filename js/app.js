@@ -4,6 +4,7 @@ import { EXERCISES, ROUTINES, GENERAL_RULES, imgUrl, ytUrl } from "./exercises.j
 import { createEvolucion } from "./evolucion.js";
 import { createSemana } from "./semana.js";
 import { createPanel } from "./panel.js";
+import { MENU_MACROS } from "./menu.js";
 
 /* ---------- utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -206,8 +207,12 @@ async function showNow() {
       <div><b>Ingredientes</b><ul class="list-disc pl-5">${list(rec.ingredients).map((x) => `<li>${x}</li>`).join("")}</ul></div>
       <div><b>Paso a paso</b><ol class="list-decimal pl-5 space-y-1">${list(rec.steps).map((x) => `<li>${x}</li>`).join("")}</ol></div>
       ${rec.tip ? `<div class="text-xs text-amber-200">${esc(rec.tip)}</div>` : ""}` : `<div class="text-xs text-amber-300">No pude generar la receta ahora. Prueba de nuevo en un momento.</div>`}
-    <button id="now-ate" class="btn bg-orange-600 w-full">Ya lo comí: estimar y guardar</button></div>`;
-  $("#now-ate").onclick = async () => { await go("comida"); runMeal({ note: text }); };
+    <button id="now-ate" class="btn bg-orange-600 w-full">Ya lo comí: agregar</button></div>`;
+  $("#now-ate").onclick = async () => {
+    const m = MENU_MACROS[text];
+    if (m) { await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][slot], text, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur }); box.innerHTML = ""; return; }
+    await go("comida"); runMeal({ note: text });
+  };
 }
 const refreshCounter = () => { const c = $("#counter"); if (c) c.outerHTML = counterHTML(); };
 
@@ -350,6 +355,16 @@ async function viewComida() {
         <button id="m-gal" class="btn bg-slate-600">🖼️ Galería</button></div>
       <textarea id="m-text" rows="2" class="inp" placeholder="O descríbela: 2 hamburguesas magras, 150 g de arroz, medio aguacate"></textarea>
       <button id="m-txt" class="btn bg-blue-600 w-full">Analizar texto</button>
+      <details class="bg-slate-900 rounded-xl p-3"><summary class="text-sm font-semibold text-green-300 cursor-pointer">Agregar comida directo (sin IA)</summary>
+        <div class="space-y-2 mt-3">
+          <input id="man-name" class="inp" placeholder="Qué comiste">
+          <select id="man-type" class="inp">${["Desayuno", "Comida", "Merienda", "Cena", "Snack"].map((t) => `<option>${t}</option>`).join("")}</select>
+          <div class="grid grid-cols-4 gap-2 text-center text-xs">
+            <div><label>kcal</label><input id="man-kcal" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Prot</label><input id="man-p" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Carb</label><input id="man-c" inputmode="decimal" class="inp text-center !px-1"></div>
+            <div><label>Grasa</label><input id="man-f" inputmode="decimal" class="inp text-center !px-1"></div></div>
+          <button id="man-ok" class="btn bg-green-600 w-full">Agregar comida</button></div></details>
       <p id="m-busy" class="text-sm text-amber-300 hidden">Analizando con IA…</p>
     </div>
     <div id="draft"></div>
@@ -361,6 +376,7 @@ async function viewComida() {
   renderMeals(); renderMenu(); renderDraft();
   $("#m-cam").onclick = () => $("#file-meal").click();
   $("#m-gal").onclick = () => $("#file-meal-gal").click();
+  $("#man-ok").onclick = addManual;
   $("#m-txt").onclick = () => { const t = $("#m-text").value.trim(); if (t) runMeal({ note: t }); else toast("Escribe qué comiste."); };
   $("#menu-day").onchange = renderMenu;
 }
@@ -481,8 +497,44 @@ function renderMenu() {
   const items = WEEKLY_MENU[$("#menu-day").value] || [];
   const labels = ["Desayuno", "Almuerzo", "Merienda", "Cena"];
   box.innerHTML = items.map((t, i) => `<div class="flex gap-2 items-start bg-slate-900 rounded-lg p-2"><div class="flex-1"><div class="text-xs text-blue-300 font-bold uppercase">${labels[i]}</div><div class="text-sm">${esc(t)}</div></div>
-    <button data-m="${i}" class="btn bg-slate-700 text-xs !py-2">+ Estimar</button></div>`).join("");
+    <div class="flex flex-col gap-1">${MENU_MACROS[t] ? `<button data-a="${i}" class="btn bg-green-600 text-xs !py-2">Agregar</button>` : ""}<button data-m="${i}" class="btn bg-slate-700 text-xs !py-2">Estimar con IA</button></div></div>`).join("");
   $$("[data-m]", box).forEach((b) => (b.onclick = () => { $("#m-text").value = items[+b.dataset.m]; runMeal({ note: items[+b.dataset.m] }); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+  $$("[data-a]", box).forEach((b) => (b.onclick = async () => {
+    const t = items[+b.dataset.a], m = MENU_MACROS[t];
+    b.disabled = true;
+    await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][+b.dataset.a], t, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur });
+    b.disabled = false;
+  }));
+}
+
+/* ---------- Agregar comida directo (sin IA) ---------- */
+async function autoProtein() {
+  if (totals().p < S.profile.goal_protein * 0.95) return;
+  const rd = await q(sb.from("daily_logs").select("habits").eq("date", S.date).maybeSingle());
+  if (rd && rd.habits && rd.habits.protein) return;
+  const habits = { ...((rd && rd.habits) || {}), protein: true };
+  await q(sb.from("daily_logs").upsert({ user_id: S.user.id, date: S.date, habits }, { onConflict: "user_id,date" }));
+  S.daily = { ...(S.daily || {}), habits: { ...((S.daily || {}).habits || {}), protein: true } };
+}
+async function addDirect(type, name, m) {
+  try {
+    await q(sb.from("meals").insert({
+      user_id: S.user.id, log_date: S.date, meal_type: type, name: String(name).slice(0, 160), items: [],
+      kcal: m.kcal || 0, protein_g: m.p || 0, carbs_g: m.c || 0, fat_g: m.f || 0, sodium_mg: m.na || 0,
+      purine_level: m.pur || null, source: "manual",
+    }));
+    S.meals = await q(sb.from("meals").select("*").eq("log_date", S.date).order("created_at"));
+    await autoProtein();
+    renderMeals(); refreshCounter();
+    toast(`Agregado: ${Math.round(m.kcal || 0)} kcal · ${Math.round(m.p || 0)} g proteína`, "ok");
+  } catch (e) { toast("No se agregó: " + e.message, "err", 6000); }
+}
+async function addManual() {
+  const name = $("#man-name").value.trim();
+  const kcal = num($("#man-kcal").value);
+  if (!name || kcal == null) { toast("Escribe el nombre y las calorías."); return; }
+  await addDirect($("#man-type").value, name, { kcal, p: num($("#man-p").value) || 0, c: num($("#man-c").value) || 0, f: num($("#man-f").value) || 0, na: 0, pur: null });
+  ["#man-name", "#man-kcal", "#man-p", "#man-c", "#man-f"].forEach((id) => { $(id).value = ""; });
 }
 
 /* ---------- vista FUERZA ---------- */
