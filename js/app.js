@@ -2,6 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from "./config.js";
 import { EXERCISES, ROUTINES, GENERAL_RULES, imgUrl, ytUrl } from "./exercises.js";
 import { createEvolucion } from "./evolucion.js";
+import { createSemana } from "./semana.js";
 
 /* ---------- utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -123,6 +124,7 @@ const totals = () => S.meals.reduce((a, m) => ({ kcal: a.kcal + +m.kcal, p: a.p 
 
 /* ---------- navegacion ---------- */
 const evo = createEvolucion({ sb, S, esc, num, r1, fdate, todayStr, toast, prepImage });
+const semana = createSemana({ sb, S, esc, r1, fdate });
 const VIEWS = { hoy: viewHoy, comida: viewComida, fuerza: viewFuerza, evolucion: () => evo.view(), progreso: viewProgreso, ajustes: viewAjustes };
 $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) go(b.dataset.tab); });
 async function go(tab) {
@@ -192,7 +194,9 @@ async function viewHoy() {
     <input id="f-${k}" inputmode="decimal" class="inp" value="${m[k] ?? ""}"></div>`;
   const chk = (id, label, on) => `<label class="flex items-center gap-3 p-2"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span>${label}</span></label>`;
   const tr = d.training || "Ninguno";
+  const weekHTML = await semana.card();
   $("#view").innerHTML = `<section class="space-y-4">
+    ${weekHTML}
     <div class="card"><label class="block text-sm font-semibold mb-1">Fecha</label><input type="date" id="date" class="inp" value="${S.date}"></div>
     ${counterHTML()}
     <div class="card space-y-3">
@@ -226,6 +230,7 @@ async function viewHoy() {
   $("#date").onchange = (e) => { S.date = e.target.value || todayStr(); viewHoy(); };
   $("#fit-up").onclick = () => $("#file-fit").click();
   $("#save-day").onclick = saveDay;
+  const wk = $("#wk-go"); if (wk) wk.onclick = () => go("evolucion");
 }
 
 async function saveDay() {
