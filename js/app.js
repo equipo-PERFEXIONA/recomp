@@ -181,7 +181,31 @@ function counterHTML() {
     ${macroRow("Carbohidratos", t.c, g.goal_carbs, " g", "#f97316")}
     ${macroRow("Grasas", t.f, g.goal_fat, " g", "#eab308")}
     <div class="flex justify-between text-xs text-slate-300"><span>Sodio ${Math.round(t.na)} / ${g.goal_sodium_mg} mg</span></div>
+    <button id="m-now" class="btn bg-green-600 w-full">¿Qué me toca comer ahora?</button><div id="now-box"></div>
     ${goalsHTML()}<p class="text-sm italic text-slate-200 border-t border-slate-700 pt-2">${esc(tipText(t))}</p></div>`;
+}
+/* ---------- ¿Qué me toca comer ahora? ---------- */
+const SLOTS = ["Desayuno", "Almuerzo", "Merienda", "Cena"];
+function currentSlot() { const d = new Date(), h = d.getHours() + d.getMinutes() / 60; return h < 11 ? 0 : h < 16 ? 1 : h < 19.5 ? 2 : 3; }
+document.addEventListener("click", (e) => { if (e.target.closest("#m-now")) showNow(); });
+async function showNow() {
+  const box = $("#now-box"); if (!box) return;
+  const wd = new Date().getDay(), day = wd === 0 || wd === 6 ? 1 : wd;
+  const slot = currentSlot(), text = WEEKLY_MENU[day][slot];
+  const g = S.profile, t = totals();
+  box.innerHTML = `<div class="rounded-xl bg-slate-900 p-3 text-sm mt-2">Preparando la receta…</div>`;
+  let rec = lsGet("recipe_" + text, null);
+  if (!rec) { try { rec = await analyze("recipe", { note: text }); lsSet("recipe_" + text, rec); } catch { rec = null; } }
+  const list = (a) => (Array.isArray(a) ? a : []).map((x) => esc(x));
+  box.innerHTML = `<div class="rounded-xl bg-slate-900 p-3 mt-2 space-y-2 text-sm">
+    <div class="text-xs text-green-300 font-bold uppercase">${SLOTS[slot]} · te quedan ${Math.round(g.goal_kcal - t.kcal)} kcal y ${Math.max(0, Math.round(g.goal_protein - t.p))} g de proteína</div>
+    <div class="font-semibold">${esc(text)}</div>
+    ${rec ? `<div class="text-xs text-slate-400">${esc(rec.title)} · ${Math.round(Number(rec.time_min) || 0)} min</div>
+      <div><b>Ingredientes</b><ul class="list-disc pl-5">${list(rec.ingredients).map((x) => `<li>${x}</li>`).join("")}</ul></div>
+      <div><b>Paso a paso</b><ol class="list-decimal pl-5 space-y-1">${list(rec.steps).map((x) => `<li>${x}</li>`).join("")}</ol></div>
+      ${rec.tip ? `<div class="text-xs text-amber-200">${esc(rec.tip)}</div>` : ""}` : `<div class="text-xs text-amber-300">No pude generar la receta ahora. Prueba de nuevo en un momento.</div>`}
+    <button id="now-ate" class="btn bg-orange-600 w-full">Ya lo comí: estimar y guardar</button></div>`;
+  $("#now-ate").onclick = async () => { await go("comida"); runMeal({ note: text }); };
 }
 const refreshCounter = () => { const c = $("#counter"); if (c) c.outerHTML = counterHTML(); };
 
