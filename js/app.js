@@ -1,6 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY, APP_VERSION } from "./config.js";
 import { EXERCISES, ROUTINES, GENERAL_RULES, imgUrl, ytUrl } from "./exercises.js";
+import { createEvolucion } from "./evolucion.js";
 
 /* ---------- utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -121,7 +122,8 @@ async function loadLastSets() {
 const totals = () => S.meals.reduce((a, m) => ({ kcal: a.kcal + +m.kcal, p: a.p + +m.protein_g, c: a.c + +m.carbs_g, f: a.f + +m.fat_g, na: a.na + +m.sodium_mg }), { kcal: 0, p: 0, c: 0, f: 0, na: 0 });
 
 /* ---------- navegacion ---------- */
-const VIEWS = { hoy: viewHoy, comida: viewComida, fuerza: viewFuerza, progreso: viewProgreso, ajustes: viewAjustes };
+const evo = createEvolucion({ sb, S, esc, num, r1, fdate, todayStr, toast, prepImage });
+const VIEWS = { hoy: viewHoy, comida: viewComida, fuerza: viewFuerza, evolucion: () => evo.view(), progreso: viewProgreso, ajustes: viewAjustes };
 $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) go(b.dataset.tab); });
 async function go(tab) {
   S.tab = tab; lsSet("tab", tab);
@@ -159,6 +161,7 @@ function goalsList() {
     ["Caminata en ayunas", !!h.walk],
     ["Agua", !!h.hydration],
     ["Medicación", !!h.meds],
+    ["Fuerza o descanso", !!d.training && d.training !== "Ninguno"],
     ["Sueño 7 h o más", (d.sleep_minutes || 0) >= 420],
   ];
 }
@@ -208,9 +211,10 @@ async function viewHoy() {
       ${chk("h-meds", "Medicación tomada", h.meds)}
       ${chk("h-pro", "Meta de proteína alcanzada", h.protein)}
       <div class="pt-3 border-t border-slate-700 space-y-2"><b>Entrenamiento</b>
-        ${["Ninguno", "Rutina A", "Rutina B"].map((x) => `<label class="flex items-center gap-3"><input type="radio" name="tr" value="${x}" ${tr === x ? "checked" : ""} style="width:1.4rem;height:1.4rem"><span>${x === "Ninguno" ? "Descanso" : x}</span></label>`).join("")}
+        ${["Ninguno", "Rutina A", "Rutina B", "Fuerza", "Descanso"].map((x) => `<label class="flex items-center gap-3"><input type="radio" name="tr" value="${x}" ${tr === x ? "checked" : ""} style="width:1.4rem;height:1.4rem"><span>${x === "Ninguno" ? "Sin registrar" : x === "Fuerza" ? "Fuerza (otra)" : x === "Descanso" ? "Día de descanso" : x}</span></label>`).join("")}
       </div>
     </div>
+    ${d.workout_min || d.exercise_min ? `<div class="card text-sm"><b class="text-orange-300">Ejercicio detectado</b><br>${d.workout_min ? `${esc(d.workout_type || "Actividad")}: ${d.workout_min} min${d.workout_km ? ` · ${d.workout_km} km` : ""}${d.workout_kcal ? ` · ${d.workout_kcal} kcal` : ""}<br>` : ""}${d.exercise_min ? `Ejercicio del día: ${d.exercise_min} min` : ""}</div>` : ""}
     <div class="card space-y-3"><h2 class="font-bold text-indigo-300">Sueño</h2>
       <p class="text-xs text-slate-400">Se rellena solo si mandas la captura de Huawei Health al bot. También puedes escribirlo.</p>
       <div class="grid grid-cols-3 gap-3">
@@ -232,11 +236,15 @@ async function saveDay() {
     for (const [k] of FIT) { const v = num($("#f-" + k).value); if (v != null) { metric[k] = v; any = true; } }
     if (S.fitRaw) metric.raw = S.fitRaw;
     if (any) await q(sb.from("body_metrics").upsert(metric, { onConflict: "user_id,date" }));
-    const daily = {
-      user_id: uid, date,
-      habits: { walk: $("#h-walk").checked, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked },
-      training: $("input[name=tr]:checked").value,
-    };
+    // Solo se aplican los cambios que hiciste tú; lo que llegó por Telegram (caminata, fuerza) no se pisa.
+    const remote = await q(sb.from("daily_logs").select("habits,training").eq("date", date).maybeSingle());
+    const seen = S.daily || {}, seenH = seen.habits || {};
+    const dom = { walk: $("#h-walk").checked, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked };
+    const habits = { ...((remote && remote.habits) || {}) };
+    for (const k of Object.keys(dom)) { if (!!seenH[k] !== dom[k] || habits[k] == null) habits[k] = dom[k]; }
+    const trDom = $("input[name=tr]:checked").value;
+    const training = trDom !== (seen.training || "Ninguno") ? trDom : (remote && remote.training) || "Ninguno";
+    const daily = { user_id: uid, date, habits, training };
     const stp = num($("#steps").value), sh = num($("#s-hours").value), ss = num($("#s-score").value), hr = num($("#s-hr").value);
     if (stp != null) daily.steps = stp;
     if (sh != null) daily.sleep_minutes = Math.round(sh * 60);
@@ -388,6 +396,15 @@ async function saveMeal() {
     }));
     S.draft = null; $("#m-text").value = "";
     S.meals = await q(sb.from("meals").select("*").eq("log_date", S.date).order("created_at"));
+    // Proteína alcanzada: se marca sola
+    if (totals().p >= S.profile.goal_protein * 0.95) {
+      const rd = await q(sb.from("daily_logs").select("habits").eq("date", S.date).maybeSingle());
+      if (!(rd && rd.habits && rd.habits.protein)) {
+        const habits = { ...((rd && rd.habits) || {}), protein: true };
+        await q(sb.from("daily_logs").upsert({ user_id: S.user.id, date: S.date, habits }, { onConflict: "user_id,date" }));
+        S.daily = { ...(S.daily || {}), habits: { ...((S.daily || {}).habits || {}), protein: true } };
+      }
+    }
     renderDraft(); renderMeals(); refreshCounter();
     toast("Comida guardada", "ok");
   } catch (e) { toast("No se guardó: " + e.message, "err", 6000); }
