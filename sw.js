@@ -1,6 +1,6 @@
 // Service worker: red primero para el código de la app (así cada commit llega al recargar),
 // caché como respaldo sin conexión. Nunca toca las llamadas a Supabase.
-const CACHE = "recomp-v1";
+const CACHE = "recomp-v2";
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => {
   e.waitUntil((async () => {
@@ -16,7 +16,7 @@ self.addEventListener("fetch", (e) => {
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     try {
-      const res = await fetch(req);
+      const res = await fetch(req, { cache: "no-cache" }); // revalida siempre: ignora la caché HTTP de 10 min de GitHub Pages
       if (res && (res.ok || res.type === "opaque")) cache.put(req, res.clone());
       return res;
     } catch {
