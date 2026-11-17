@@ -1,8 +1,8 @@
 // Valores estimados (aprox.) de cada comida del menú. Permiten agregar con un toque, sin esperar a la IA.
 export const MENU_MACROS = {
   "3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate": {
-    "kcal": 615,
-    "p": 46.5,
+    "kcal": 619,
+    "p": 47.6,
     "c": 53.1,
     "f": 25,
     "na": 1198,
@@ -33,8 +33,8 @@ export const MENU_MACROS = {
     "pur": "low"
   },
   "Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %": {
-    "kcal": 439,
-    "p": 36.5,
+    "kcal": 441,
+    "p": 37,
     "c": 32.3,
     "f": 17.1,
     "na": 776,
@@ -65,8 +65,8 @@ export const MENU_MACROS = {
     "pur": "medium"
   },
   "1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera": {
-    "kcal": 467,
-    "p": 35.1,
+    "kcal": 470,
+    "p": 35.9,
     "c": 56,
     "f": 11.5,
     "na": 873,
@@ -81,8 +81,8 @@ export const MENU_MACROS = {
     "pur": "medium"
   },
   "2 huevos duros + 200 g de piña + 100 g cottage 0 %": {
-    "kcal": 321,
-    "p": 26,
+    "kcal": 323,
+    "p": 26.5,
     "c": 30.6,
     "f": 11.6,
     "na": 446,
@@ -121,16 +121,16 @@ export const MENU_MACROS = {
     "pur": "low"
   },
   "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana": {
-    "kcal": 344,
-    "p": 23.9,
+    "kcal": 347,
+    "p": 24.7,
     "c": 58.4,
     "f": 2.2,
     "na": 748,
     "pur": "low"
   },
   "1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %": {
-    "kcal": 421,
-    "p": 34.9,
+    "kcal": 423,
+    "p": 35.4,
     "c": 32,
     "f": 16,
     "na": 783,
@@ -145,8 +145,8 @@ export const MENU_MACROS = {
     "pur": "medium"
   },
   "2 huevos duros + manzana + 100 g cottage 0 %": {
-    "kcal": 316,
-    "p": 25.5,
+    "kcal": 318,
+    "p": 26,
     "c": 30.6,
     "f": 11.5,
     "na": 446,
