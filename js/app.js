@@ -50,11 +50,11 @@ const S = {
 };
 
 const WEEKLY_MENU = {
-  1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "200 g de piña", "2 latas de atún + 100 g cottage + aceitunas"],
-  2: ["Café + 3 huevos revueltos", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "Manzana + 100 g cottage", "Ensalada: 2 latas de atún + 150 g porotos + cherrys y aceitunas"],
-  3: ["1 panecillo tostado + 2 huevos", "200 g lentejas salteadas con setas + 2 huevos a la plancha", "200 g de piña + leche", "2 hamburguesas magras + 200 g papas + cherrys"],
-  4: ["150 g cottage 0 % + manzana", "2 latas de atún + 150 g arroz + 1/2 aguacate", "2 huevos duros", "2 hamburguesas magras + 150 g porotos + setas"],
-  5: ["1 panecillo con 1/2 aguacate", "2 hamburguesas magras + 200 g papas + aceitunas", "Manzana + 100 g cottage", "2 latas de atún + 150 g lentejas + cherrys + alcaparras"],
+  1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "250 g yogur griego 0 % + 1 pera madura"],
+  2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g yogur griego 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "200 g yogur griego 0 % + 2 huevos duros + manzana", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
+  3: ["1 panecillo tostado + 2 huevos + 200 g yogur griego 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "200 g de merluza al vapor + 150 g de puré de patata sin mantequilla"],
+  4: ["2 huevos duros + 250 g yogur griego 0 % + manzana + 2 tostadas integrales", "2 latas de atún + 150 g arroz + 1/2 aguacate", "200 g cottage 0 % + 1 pera", "Caldo de verduras + 150 g de pechuga de pollo desmenuzada + 40 g de fideos finos"],
+  5: ["1 panecillo tostado + 3 huevos revueltos + 200 g yogur griego 0 %", "2 hamburguesas magras + 150 g porotos + setas", "250 g yogur griego 0 % + 200 g de piña", "200 g de bacalao fresco al vapor + 200 g de calabaza al horno"],
 };
 
 const FIT = [
