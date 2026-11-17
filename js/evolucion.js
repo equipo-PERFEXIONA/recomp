@@ -133,7 +133,7 @@ export function createEvolucion(ctx) {
     S.charts.push(new Chart($("#e-cv"), {
       type: "line",
       data: { labels: pts.map((r) => fdate(r.date)), datasets: MEAS.map(([k, l], i) => ({ label: l, data: pts.map((r) => r[k]), borderColor: COLORS[i], tension: 0.3, spanGaps: true })) },
-      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: "#334155" } }, y: { grid: { color: "#334155" } } }, plugins: { legend: { labels: { color: "#cbd5e1" } } } },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: "#e2e8f0" } }, y: { grid: { color: "#e2e8f0" } } }, plugins: { legend: { labels: { color: "#475569" } } } },
     }));
   }
 

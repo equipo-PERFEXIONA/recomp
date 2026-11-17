@@ -16,28 +16,28 @@ export const MENU_MACROS = {
     "na": 480,
     "pur": "medium"
   },
-  "2 huevos duros + 200 g de piña + 100 g cottage 0 %": {
-    "kcal": 325,
-    "p": 26,
-    "c": 30.1,
-    "f": 11.6,
-    "na": 490,
+  "2 huevos duros + 200 g de piña + 1 vaso de leche descremada": {
+    "kcal": 340,
+    "p": 22.5,
+    "c": 38.6,
+    "f": 11.9,
+    "na": 231,
     "pur": "low"
   },
-  "250 g yogur griego 0 % + 1 pera madura": {
-    "kcal": 230,
-    "p": 26,
-    "c": 31.5,
-    "f": 1.2,
-    "na": 91,
+  "250 g de yogur 0,0 % + 1 manzana asada con canela": {
+    "kcal": 200,
+    "p": 11.5,
+    "c": 39,
+    "f": 0.6,
+    "na": 122,
     "pur": "low"
   },
-  "Café + 3 huevos revueltos + 2 tostadas integrales + 200 g yogur griego 0 %": {
-    "kcal": 489,
-    "p": 44.5,
-    "c": 35,
-    "f": 17.3,
-    "na": 528,
+  "Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %": {
+    "kcal": 443,
+    "p": 36.5,
+    "c": 31.8,
+    "f": 17.1,
+    "na": 820,
     "pur": "low"
   },
   "2 hamburguesas magras + 150 g arroz + 1/2 aguacate": {
@@ -48,28 +48,28 @@ export const MENU_MACROS = {
     "na": 192,
     "pur": "medium"
   },
-  "200 g yogur griego 0 % + 2 huevos duros + manzana": {
-    "kcal": 355,
-    "p": 33.5,
-    "c": 33,
-    "f": 10.7,
-    "na": 216,
+  "2 huevos duros + manzana + 1 vaso de leche descremada": {
+    "kcal": 335,
+    "p": 22,
+    "c": 38.6,
+    "f": 11.8,
+    "na": 231,
     "pur": "low"
   },
-  "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido": {
-    "kcal": 188,
-    "p": 18.9,
-    "c": 5.5,
-    "f": 9.9,
-    "na": 248,
-    "pur": "low"
+  "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 100 g de pollo desmenuzado": {
+    "kcal": 265,
+    "p": 29,
+    "c": 29,
+    "f": 2,
+    "na": 700,
+    "pur": "medium"
   },
-  "1 panecillo tostado + 2 huevos + 200 g yogur griego 0 % + 1 pera": {
-    "kcal": 484,
-    "p": 37.5,
-    "c": 56.4,
-    "f": 11.6,
-    "na": 465,
+  "1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera": {
+    "kcal": 473,
+    "p": 35.1,
+    "c": 55.2,
+    "f": 11.5,
+    "na": 939,
     "pur": "low"
   },
   "2 hamburguesas magras + 200 g lentejas salteadas con setas": {
@@ -80,28 +80,28 @@ export const MENU_MACROS = {
     "na": 439,
     "pur": "medium"
   },
-  "2 huevos duros + 200 g de piña + 1 vaso de leche descremada": {
-    "kcal": 340,
-    "p": 22.5,
-    "c": 38.6,
-    "f": 11.9,
-    "na": 231,
+  "2 huevos duros + 200 g de piña + 100 g cottage 0 %": {
+    "kcal": 325,
+    "p": 26,
+    "c": 30.1,
+    "f": 11.6,
+    "na": 490,
     "pur": "low"
   },
-  "200 g de merluza al vapor + 150 g de puré de patata sin mantequilla": {
-    "kcal": 315,
-    "p": 36,
-    "c": 26,
-    "f": 6.5,
-    "na": 190,
-    "pur": "medium"
+  "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido": {
+    "kcal": 188,
+    "p": 18.9,
+    "c": 5.5,
+    "f": 9.9,
+    "na": 248,
+    "pur": "low"
   },
-  "2 huevos duros + 250 g yogur griego 0 % + manzana + 2 tostadas integrales": {
-    "kcal": 534,
-    "p": 44,
-    "c": 61.4,
-    "f": 12.5,
-    "na": 500,
+  "Café con leche + 3 huevos revueltos + 2 tostadas integrales + manzana": {
+    "kcal": 531,
+    "p": 31.3,
+    "c": 62.3,
+    "f": 16.8,
+    "na": 571,
     "pur": "low"
   },
   "2 latas de atún + 150 g arroz + 1/2 aguacate": {
@@ -112,28 +112,28 @@ export const MENU_MACROS = {
     "na": 592,
     "pur": "medium"
   },
-  "200 g cottage 0 % + 1 pera": {
-    "kcal": 225,
-    "p": 24.5,
-    "c": 26.5,
-    "f": 0.6,
-    "na": 729,
+  "2 huevos duros + 1 pera + 1 vaso de leche descremada": {
+    "kcal": 325,
+    "p": 22,
+    "c": 36.1,
+    "f": 11.7,
+    "na": 231,
     "pur": "low"
   },
-  "Caldo de verduras + 150 g de pechuga de pollo desmenuzada + 40 g de fideos finos": {
-    "kcal": 325,
-    "p": 39,
-    "c": 31,
-    "f": 3,
-    "na": 350,
-    "pur": "medium"
+  "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana": {
+    "kcal": 350,
+    "p": 23.9,
+    "c": 57.6,
+    "f": 2.2,
+    "na": 814,
+    "pur": "low"
   },
-  "1 panecillo tostado + 3 huevos revueltos + 200 g yogur griego 0 %": {
-    "kcal": 471,
-    "p": 43.3,
-    "c": 34.7,
-    "f": 16.2,
-    "na": 535,
+  "1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %": {
+    "kcal": 425,
+    "p": 34.9,
+    "c": 31.5,
+    "f": 16,
+    "na": 827,
     "pur": "low"
   },
   "2 hamburguesas magras + 150 g porotos + setas": {
@@ -144,20 +144,20 @@ export const MENU_MACROS = {
     "na": 335,
     "pur": "medium"
   },
-  "250 g yogur griego 0 % + 200 g de piña": {
-    "kcal": 245,
-    "p": 26.5,
-    "c": 34,
-    "f": 1.4,
-    "na": 92,
+  "2 huevos duros + manzana + 100 g cottage 0 %": {
+    "kcal": 320,
+    "p": 25.5,
+    "c": 30.1,
+    "f": 11.5,
+    "na": 490,
     "pur": "low"
   },
-  "200 g de bacalao fresco al vapor + 200 g de calabaza al horno": {
-    "kcal": 256,
-    "p": 38,
-    "c": 13,
-    "f": 6,
-    "na": 195,
-    "pur": "medium"
+  "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 1 huevo pochado + 1 manzana": {
+    "kcal": 322,
+    "p": 12.8,
+    "c": 54,
+    "f": 5.8,
+    "na": 673,
+    "pur": "low"
   }
 };

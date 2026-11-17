@@ -77,7 +77,7 @@ export function createPanel(ctx) {
   const q = async (p) => { const { data, error } = await p; if (error) throw error; return data; };
   const iso = (ms) => new Date(ms - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
-  const tileHTML = (t) => `<div class="rounded-2xl p-3" style="background:linear-gradient(135deg,${t.c}38,#1e293b);border:1px solid ${t.c}77">
+  const tileHTML = (t) => `<div class="rounded-2xl p-3" style="background:linear-gradient(135deg,${t.c}26,#ffffff);border:1px solid ${t.c}77">
       <div class="flex items-center gap-2 text-xs uppercase font-semibold" style="color:${t.c}"><span class="text-lg">${t.i}</span>${esc(t.n)}</div>
       <div class="text-2xl font-bold mt-1">${esc(t.v)}${t.tag ? ` <span class="text-xs align-middle rounded-full px-2 py-0.5" style="background:${t.tag.c}33;color:${t.tag.c}">${esc(t.tag.t)}</span>` : ""}</div>
       <div class="text-xs text-slate-300">${esc(t.s)}</div>
@@ -114,7 +114,7 @@ export function createPanel(ctx) {
     const by = Object.fromEntries(daily.map((x) => [x.date, x]));
     const labels = days.map((d) => d.slice(8) + "/" + d.slice(5, 7));
     const box = document.querySelector("#pn-charts");
-    const grid = { color: "#334155" }, leg = { labels: { color: "#cbd5e1" } };
+    const grid = { color: "#e2e8f0" }, leg = { labels: { color: "#475569" } };
     const add = (id, title, color, build) => {
       const el = document.createElement("div"); el.className = "card";
       el.style.borderColor = color + "77";
@@ -126,7 +126,7 @@ export function createPanel(ctx) {
     if (hasSleep) add("pn-sleep", "🌙 Sueño (horas)", COL.sleep, () => ({
       data: { labels, datasets: [
         { type: "bar", label: "Horas", data: days.map((d) => (by[d] && by[d].sleep_minutes ? Math.round((by[d].sleep_minutes / 60) * 10) / 10 : null)), backgroundColor: COL.sleep },
-        { type: "line", label: "Meta 7 h", data: days.map(() => 7), borderColor: "#e9d5ff", borderDash: [6, 4], pointRadius: 0 }] },
+        { type: "line", label: "Meta 7 h", data: days.map(() => 7), borderColor: "#7c3aed", borderDash: [6, 4], pointRadius: 0 }] },
       options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid }, y: { grid, beginAtZero: true } }, plugins: { legend: leg } },
     }));
     const hasBp = days.some((d) => by[d] && (by[d].bp_am_sys || by[d].bp_pm_sys));
@@ -134,16 +134,16 @@ export function createPanel(ctx) {
       type: "line",
       data: { labels, datasets: [
         { label: "Sistólica mañana", data: days.map((d) => (by[d] && by[d].bp_am_sys) || null), borderColor: "#ef4444", spanGaps: true, tension: 0.3 },
-        { label: "Diastólica mañana", data: days.map((d) => (by[d] && by[d].bp_am_dia) || null), borderColor: "#fca5a5", spanGaps: true, tension: 0.3 },
+        { label: "Diastólica mañana", data: days.map((d) => (by[d] && by[d].bp_am_dia) || null), borderColor: "#dc2626", spanGaps: true, tension: 0.3 },
         { label: "Sistólica noche", data: days.map((d) => (by[d] && by[d].bp_pm_sys) || null), borderColor: "#f59e0b", spanGaps: true, tension: 0.3 },
-        { label: "Diastólica noche", data: days.map((d) => (by[d] && by[d].bp_pm_dia) || null), borderColor: "#fde68a", spanGaps: true, tension: 0.3 }] },
+        { label: "Diastólica noche", data: days.map((d) => (by[d] && by[d].bp_pm_dia) || null), borderColor: "#d97706", spanGaps: true, tension: 0.3 }] },
       options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid }, y: { grid } }, plugins: { legend: leg } },
     }));
     const hasSteps = days.some((d) => by[d] && by[d].steps);
     if (hasSteps) add("pn-steps", "👟 Pasos", COL.steps, () => ({
       data: { labels, datasets: [
         { type: "bar", label: "Pasos", data: days.map((d) => (by[d] && by[d].steps) || null), backgroundColor: COL.steps },
-        { type: "line", label: "Meta", data: days.map(() => S.profile.goal_steps), borderColor: "#bbf7d0", borderDash: [6, 4], pointRadius: 0 }] },
+        { type: "line", label: "Meta", data: days.map(() => S.profile.goal_steps), borderColor: "#16a34a", borderDash: [6, 4], pointRadius: 0 }] },
       options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid }, y: { grid, beginAtZero: true } }, plugins: { legend: leg } },
     }));
   }

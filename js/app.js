@@ -50,11 +50,11 @@ const S = {
 };
 
 const WEEKLY_MENU = {
-  1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "250 g yogur griego 0 % + 1 pera madura"],
-  2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g yogur griego 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "200 g yogur griego 0 % + 2 huevos duros + manzana", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
-  3: ["1 panecillo tostado + 2 huevos + 200 g yogur griego 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "200 g de merluza al vapor + 150 g de puré de patata sin mantequilla"],
-  4: ["2 huevos duros + 250 g yogur griego 0 % + manzana + 2 tostadas integrales", "2 latas de atún + 150 g arroz + 1/2 aguacate", "200 g cottage 0 % + 1 pera", "Caldo de verduras + 150 g de pechuga de pollo desmenuzada + 40 g de fideos finos"],
-  5: ["1 panecillo tostado + 3 huevos revueltos + 200 g yogur griego 0 %", "2 hamburguesas magras + 150 g porotos + setas", "250 g yogur griego 0 % + 200 g de piña", "200 g de bacalao fresco al vapor + 200 g de calabaza al horno"],
+  1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "250 g de yogur 0,0 % + 1 manzana asada con canela"],
+  2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + manzana + 1 vaso de leche descremada", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 100 g de pollo desmenuzado"],
+  3: ["1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
+  4: ["Café con leche + 3 huevos revueltos + 2 tostadas integrales + manzana", "2 latas de atún + 150 g arroz + 1/2 aguacate", "2 huevos duros + 1 pera + 1 vaso de leche descremada", "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana"],
+  5: ["1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %", "2 hamburguesas magras + 150 g porotos + setas", "2 huevos duros + manzana + 100 g cottage 0 %", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 1 huevo pochado + 1 manzana"],
 };
 
 const FIT = [
@@ -158,28 +158,37 @@ function tipText(t) {
 }
 function goalsList() {
   const g = S.profile, t = totals(), d = S.daily || {}, h = d.habits || {}, has = S.meals.length > 0;
+  const pc = (v, goal) => (goal > 0 ? Math.round((v / goal) * 100) : 0);
+  const lv = (v, goal, mid) => (v >= goal ? 2 : v >= goal * mid ? 1 : 0);
+  const steps = d.steps || 0, sleep = d.sleep_minutes || 0;
+  const kc = has ? (t.kcal <= g.goal_kcal && t.kcal >= g.goal_kcal * 0.85 ? 2 : t.kcal >= g.goal_kcal * 0.6 && t.kcal <= g.goal_kcal * 1.05 ? 1 : 0) : 0;
+  const na = has ? (t.na <= g.goal_sodium_mg ? 2 : t.na <= g.goal_sodium_mg * 1.15 ? 1 : 0) : 0;
   return [
-    ["Calorías en rango", has && t.kcal <= g.goal_kcal && t.kcal >= g.goal_kcal * 0.85],
-    ["Proteína", t.p >= g.goal_protein * 0.95],
-    ["Sodio bajo el tope", has && t.na <= g.goal_sodium_mg],
-    ["Pasos", (d.steps || 0) >= g.goal_steps],
-    ["Caminata en ayunas", !!h.walk],
-    ["Agua", !!h.hydration],
-    ["Medicación", !!h.meds],
-    ["Fuerza o descanso", !!d.training && d.training !== "Ninguno"],
-    ["Sueño 7 h o más", (d.sleep_minutes || 0) >= 420],
+    ["Calorías", kc, has ? pc(t.kcal, g.goal_kcal) + " %" : "sin datos"],
+    ["Proteína", lv(t.p, g.goal_protein * 0.95, 0.7), pc(t.p, g.goal_protein) + " %"],
+    ["Sodio", na, has ? pc(t.na, g.goal_sodium_mg) + " %" : "sin datos"],
+    ["Caminata " + g.goal_steps + " pasos", lv(steps, g.goal_steps, 0.5), pc(steps, g.goal_steps) + " %"],
+    ["Agua", h.hydration ? 2 : 0, h.hydration ? "hecho" : "falta"],
+    ["Medicación", h.meds ? 2 : 0, h.meds ? "hecho" : "falta"],
+    ["Fuerza o descanso", d.training && d.training !== "Ninguno" ? 2 : 0, d.training && d.training !== "Ninguno" ? esc(d.training) : "sin registrar"],
+    ["Sueño 7 h", lv(sleep, 420, 0.85), sleep ? Math.round((sleep / 60) * 10) / 10 + " h" : "sin datos"],
   ];
 }
+const SEM = [["#fee2e2", "#991b1b", "✗"], ["#fef3c7", "#92400e", "●"], ["#dcfce7", "#166534", "✓"]];
 function goalsHTML() {
-  const l = goalsList(), ok = l.filter((x) => x[1]).length;
-  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b></div>
-    <div class="grid grid-cols-2 gap-1 text-xs">${l.map(([n, v]) => `<div class="rounded-lg px-2 py-1 ${v ? "bg-green-900 text-green-200" : "bg-slate-900 text-slate-300"}">${v ? "✓" : "✗"} ${n}</div>`).join("")}</div></div>`;
+  const l = goalsList(), ok = l.filter((x) => x[1] === 2).length;
+  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b> <span class="text-xs text-slate-400">verde cumplida · amarillo a medias · rojo falta</span></div>
+    <div class="grid grid-cols-2 gap-1 text-xs">${l.map(([n, v, det]) => `<div class="rounded-lg px-2 py-1" style="background:${SEM[v][0]};color:${SEM[v][1]}">${SEM[v][2]} ${n} · ${det}</div>`).join("")}</div></div>`;
+}
+function walkSem(steps) {
+  const goal = S.profile.goal_steps, p = Math.round(((steps || 0) / goal) * 100), v = p >= 100 ? 2 : p >= 50 ? 1 : 0;
+  return `<div class="rounded-xl p-3 text-sm font-semibold" style="background:${SEM[v][0]};color:${SEM[v][1]}">${SEM[v][2]} Caminata: ${(steps || 0).toLocaleString("es-ES")} / ${goal.toLocaleString("es-ES")} pasos · ${p} %<div class="text-xs font-normal">Se marca sola según tus pasos: verde con ${goal.toLocaleString("es-ES")} o más.</div></div>`;
 }
 function counterHTML() {
   const g = S.profile, t = totals();
   return `<div class="card space-y-3" id="counter">
     <div class="flex justify-between items-baseline"><h2 class="font-bold text-orange-300">Hoy, lo que te queda</h2><span class="text-xs text-slate-400">${fdate(S.date)}</span></div>
-    ${macroRow("Calorías", t.kcal, g.goal_kcal, "", "#f8fafc")}
+    ${macroRow("Calorías", t.kcal, g.goal_kcal, "", "#0f172a")}
     ${macroRow("Proteína", t.p, g.goal_protein, " g", "#3b82f6")}
     ${macroRow("Carbohidratos", t.c, g.goal_carbs, " g", "#f97316")}
     ${macroRow("Grasas", t.f, g.goal_fat, " g", "#eab308")}
@@ -223,6 +232,7 @@ async function viewHoy() {
   const m = S.metric || {}, d = S.daily || {}, h = d.habits || {};
   const fld = ([k, label], i) => `<div class="${i >= FIT_MAIN ? "" : ""}"><label class="block text-xs text-slate-300 mb-1">${label}</label>
     <input id="f-${k}" inputmode="decimal" class="inp" value="${m[k] ?? ""}"></div>`;
+  setTimeout(() => { const si = $("#steps"); if (si) si.addEventListener("input", () => { const v = num(si.value) || 0; $("#walk-sem").innerHTML = walkSem(v); $("#h-walk").checked = v >= S.profile.goal_steps; }); }, 0);
   const chk = (id, label, on) => `<label class="flex items-center gap-3 p-2"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span>${label}</span></label>`;
   const tr = d.training || "Ninguno";
   const weekHTML = await semana.card();
@@ -241,7 +251,7 @@ async function viewHoy() {
     <div class="card space-y-1">
       <h2 class="font-bold text-green-300 mb-2">Hábitos</h2>
       <div><label class="block text-xs text-slate-300 mb-1">Pasos (meta ${S.profile.goal_steps})</label><input id="steps" inputmode="numeric" class="inp mb-2" value="${d.steps ?? ""}"></div>
-      ${chk("h-walk", "Caminata en ayunas 7000+ pasos", h.walk)}
+      <div id="walk-sem" class="mb-1">${walkSem(d.steps)}</div><input type="checkbox" id="h-walk" class="hidden" ${(d.steps || 0) >= S.profile.goal_steps ? "checked" : ""}>
       ${chk("h-hyd", "Agua 3.5 L + sal según indicación", h.hydration)}
       ${chk("h-meds", "Medicación tomada", h.meds)}
       ${chk("h-pro", "Meta de proteína alcanzada", h.protein)}
@@ -281,7 +291,7 @@ async function saveDay() {
     // Solo se aplican los cambios que hiciste tú; lo que llegó por Telegram (caminata, fuerza) no se pisa.
     const remote = await q(sb.from("daily_logs").select("habits,training").eq("date", date).maybeSingle());
     const seen = S.daily || {}, seenH = seen.habits || {};
-    const dom = { walk: $("#h-walk").checked, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked };
+    const dom = { walk: (num($("#steps").value) || 0) >= S.profile.goal_steps, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked };
     const habits = { ...((remote && remote.habits) || {}) };
     for (const k of Object.keys(dom)) { if (!!seenH[k] !== dom[k] || habits[k] == null) habits[k] = dom[k]; }
     const trDom = $("input[name=tr]:checked").value;
@@ -755,7 +765,7 @@ async function viewProgresoBase() {
       ${[...W].reverse().slice(0, 40).map((x) => { const dl = daily.find((d) => d.date === x.date); const hs = dl ? Object.values(dl.habits || {}).filter(Boolean).length : 0; return `<tr class="border-t border-slate-700 text-center"><td class="text-left p-1">${fdate(x.date)}</td><td>${x.weight_kg}</td><td>${x.body_fat_pct ?? "-"}</td><td>${x.muscle_kg ?? "-"}</td><td>${x.bmr ?? "-"}</td><td>${hs}/4</td></tr>`; }).join("")}
     </tbody></table></div></section>`;
 
-  const grid = { color: "#334155" }, leg = { labels: { color: "#cbd5e1" } };
+  const grid = { color: "#e2e8f0" }, leg = { labels: { color: "#475569" } };
   const lab = W.map((x) => fdate(x.date));
   S.charts.push(new Chart($("#c1"), { type: "line", data: { labels: lab, datasets: [
     { label: "Peso (kg)", data: W.map((x) => x.weight_kg), borderColor: "#ef4444", tension: 0.3, yAxisID: "y" },
