@@ -42,7 +42,7 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { up
 const q = async (p) => { const { data, error } = await p; if (error) throw error; return data; };
 
 /* ---------- estado ---------- */
-const GOAL_DEFAULT = { goal_kcal: 2300, goal_protein: 190, goal_carbs: 150, goal_fat: 100, goal_steps: 7000, goal_water_l: 3.5, goal_sodium_mg: 2000, height_cm: 185 };
+const GOAL_DEFAULT = { goal_kcal: 2000, goal_protein: 180, goal_carbs: 150, goal_fat: 100, goal_steps: 7000, goal_water_l: 3.5, goal_sodium_mg: 2000, height_cm: 185 };
 const S = {
   user: null, profile: { ...GOAL_DEFAULT }, date: todayStr(), tab: lsGet("tab", "hoy"),
   meals: [], daily: null, metric: null, draft: null, routine: lsGet("routine", "A"),
