@@ -53,7 +53,7 @@ const WEEKLY_MENU = {
   1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "250 g de yogur 0,0 % + 1 manzana asada con canela"],
   2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + manzana + 1 vaso de leche descremada", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 100 g de pollo desmenuzado"],
   3: ["1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
-  4: ["Café con leche + 3 huevos revueltos + 2 tostadas integrales + manzana", "2 latas de atún + 150 g arroz + 1/2 aguacate", "2 huevos duros + 1 pera + 1 vaso de leche descremada", "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana"],
+  4: ["Café con leche + 3 huevos revueltos + 2 tostadas integrales + manzana", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + 1 pera + 1 vaso de leche descremada", "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana"],
   5: ["1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %", "2 hamburguesas magras + 150 g porotos + setas", "2 huevos duros + manzana + 100 g cottage 0 %", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 1 huevo pochado + 1 manzana"],
 };
 
@@ -151,7 +151,7 @@ function tipText(t) {
   const rp = g.goal_protein - t.p, rk = g.goal_kcal - t.kcal;
   const tips = [];
   if (rk < 0) tips.push("Superaste las kcal de hoy.");
-  if (rp > 40 && rk < 500) tips.push(`Faltan ${Math.round(rp)} g de proteína con pocas kcal: cottage 0 %, claras o atún.`);
+  if (rp > 40 && rk < 500) tips.push(`Faltan ${Math.round(rp)} g de proteína con pocas kcal: cottage 0 % o claras.`);
   if (t.na > g.goal_sodium_mg) tips.push("Sodio por encima de tu tope: agua y menos conservas, aceitunas o embutidos.");
   if (S.meals.some((m) => m.purine_level === "high")) tips.push("Hoy hay una comida alta en purinas (cuida el ácido úrico).");
   return tips.length ? tips.join(" ") : "Vas por buen camino.";
