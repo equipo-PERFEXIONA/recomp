@@ -168,7 +168,7 @@ function goalsList() {
   const g = S.profile, t = totals(), d = S.daily || {}, h = d.habits || {}, has = S.meals.length > 0;
   const pc = (v, goal) => (goal > 0 ? Math.round((v / goal) * 100) : 0);
   const lv = (v, goal, mid) => (v >= goal ? 2 : v >= goal * mid ? 1 : 0);
-  const steps = d.steps || 0, sleep = (S.prevDaily && S.prevDaily.sleep_minutes) || 0;
+  const steps = d.steps || 0, sleep = d.sleep_minutes || (S.prevDaily && S.prevDaily.sleep_minutes) || 0;
   const kr = g.goal_kcal > 0 ? t.kcal / g.goal_kcal : 0;
   const kc = has ? (kr >= 0.75 && kr <= 1 ? 2 : (kr > 1 && kr <= 1.1) || (kr >= 0.65 && kr < 0.75) ? 1 : 0) : 0;
   const pu = has ? (t.pur <= g.goal_purine_mg ? 2 : t.pur <= g.goal_purine_mg * 1.15 ? 1 : 0) : 0;
