@@ -42,14 +42,17 @@ if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", { up
 const q = async (p) => { const { data, error } = await p; if (error) throw error; return data; };
 
 /* ---------- estado ---------- */
-const GOAL_DEFAULT = { goal_kcal: 2000, goal_protein: 180, goal_carbs: 150, goal_fat: 100, goal_steps: 7000, goal_water_l: 3.5, goal_sodium_mg: 2000, height_cm: 185 };
+const GOAL_DEFAULT = { goal_kcal: 2000, goal_protein: 180, goal_carbs: 150, goal_fat: 100, goal_steps: 7000, goal_water_l: 3.5, goal_sodium_mg: 2000, goal_purine_mg: 150, goal_fructose_g: 25, height_cm: 185 };
 const S = {
   user: null, profile: { ...GOAL_DEFAULT }, date: todayStr(), tab: lsGet("tab", "hoy"),
   meals: [], daily: null, metric: null, draft: null, routine: lsGet("routine", "A"),
   lastSets: {}, media: {}, started: null, charts: [], fitSource: "manual", fitRaw: null,
 };
 
+const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const WEEKLY_MENU = {
+  6: ["1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %","2 hamburguesas magras + 150 g arroz + 1/2 aguacate","2 huevos duros + 1 pera + 1 vaso de leche descremada","250 g de yogur 0,0 % + 1 manzana asada con canela"],
+  0: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %","2 hamburguesas magras + 150 g porotos + setas","2 huevos duros + 200 g de piña + 100 g cottage 0 %","Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
   1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "250 g de yogur 0,0 % + 1 manzana asada con canela"],
   2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + manzana + 1 vaso de leche descremada", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 100 g de pollo desmenuzado"],
   3: ["1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
@@ -110,6 +113,7 @@ async function loadDay() {
       q(sb.from("meals").select("*").eq("log_date", d).order("created_at")),
     ]);
     S.daily = daily; S.metric = metric; S.meals = meals;
+    try { const pd = new Date(d + "T12:00:00"); pd.setDate(pd.getDate() - 1); S.prevDaily = await q(sb.from("daily_logs").select("sleep_minutes,sleep_score,date").eq("date", pd.toISOString().slice(0, 10)).maybeSingle()); } catch { S.prevDaily = null; }
     setSync("#22c55e");
   } catch (e) { setSync("#ef4444"); toast("Sin conexión o error: " + e.message, "err"); }
 }
@@ -122,7 +126,9 @@ async function loadLastSets() {
     for (const r of rows) if (!S.lastSets[r.exercise_id]) S.lastSets[r.exercise_id] = r;
   } catch { /* opcional */ }
 }
-const totals = () => S.meals.reduce((a, m) => ({ kcal: a.kcal + +m.kcal, p: a.p + +m.protein_g, c: a.c + +m.carbs_g, f: a.f + +m.fat_g, na: a.na + +m.sodium_mg }), { kcal: 0, p: 0, c: 0, f: 0, na: 0 });
+const PUR_LEVEL = { low: 30, medium: 90, high: 200 };
+function mealPur(m) { return m.purine_mg != null && m.purine_mg !== "" ? +m.purine_mg : PUR_LEVEL[m.purine_level] || 0; }
+const totals = () => S.meals.reduce((a, m) => ({ kcal: a.kcal + +m.kcal, p: a.p + +m.protein_g, c: a.c + +m.carbs_g, f: a.f + +m.fat_g, na: a.na + +m.sodium_mg, pur: a.pur + mealPur(m), fru: a.fru + (+m.fructose_g || 0) }), { kcal: 0, p: 0, c: 0, f: 0, na: 0, pur: 0, fru: 0 });
 
 /* ---------- navegacion ---------- */
 const evo = createEvolucion({ sb, S, esc, num, r1, fdate, todayStr, toast, prepImage });
@@ -153,31 +159,36 @@ function tipText(t) {
   if (rk < 0) tips.push("Superaste las kcal de hoy.");
   if (rp > 40 && rk < 500) tips.push(`Faltan ${Math.round(rp)} g de proteína con pocas kcal: cottage 0 % o claras.`);
   if (t.na > g.goal_sodium_mg) tips.push("Sodio por encima de tu tope: agua y menos conservas, aceitunas o embutidos.");
-  if (S.meals.some((m) => m.purine_level === "high")) tips.push("Hoy hay una comida alta en purinas (cuida el ácido úrico).");
+  if (t.pur > g.goal_purine_mg) tips.push("Purinas por encima de tu límite de hoy: sin carne, embutidos ni legumbres el resto del día.");
+  else if (S.meals.some((m) => m.purine_level === "high")) tips.push("Hoy hay una comida alta en purinas (cuida el ácido úrico).");
+  if (t.fru > g.goal_fructose_g) tips.push("Fructosa pasada del límite: nada de fruta ni zumo hasta mañana.");
   return tips.length ? tips.join(" ") : "Vas por buen camino.";
 }
 function goalsList() {
   const g = S.profile, t = totals(), d = S.daily || {}, h = d.habits || {}, has = S.meals.length > 0;
   const pc = (v, goal) => (goal > 0 ? Math.round((v / goal) * 100) : 0);
   const lv = (v, goal, mid) => (v >= goal ? 2 : v >= goal * mid ? 1 : 0);
-  const steps = d.steps || 0, sleep = d.sleep_minutes || 0;
-  const kc = has ? (t.kcal <= g.goal_kcal && t.kcal >= g.goal_kcal * 0.85 ? 2 : t.kcal >= g.goal_kcal * 0.6 && t.kcal <= g.goal_kcal * 1.05 ? 1 : 0) : 0;
+  const steps = d.steps || 0, sleep = (S.prevDaily && S.prevDaily.sleep_minutes) || 0;
+  const kr = g.goal_kcal > 0 ? t.kcal / g.goal_kcal : 0;
+  const kc = has ? (kr >= 0.75 && kr <= 1 ? 2 : (kr > 1 && kr <= 1.1) || (kr >= 0.65 && kr < 0.75) ? 1 : 0) : 0;
+  const pu = has ? (t.pur <= g.goal_purine_mg ? 2 : t.pur <= g.goal_purine_mg * 1.15 ? 1 : 0) : 0;
   const na = has ? (t.na <= g.goal_sodium_mg ? 2 : t.na <= g.goal_sodium_mg * 1.15 ? 1 : 0) : 0;
   return [
     ["Calorías", kc, has ? pc(t.kcal, g.goal_kcal) + " %" : "sin datos"],
     ["Proteína", lv(t.p, g.goal_protein * 0.95, 0.7), pc(t.p, g.goal_protein) + " %"],
     ["Sodio", na, has ? pc(t.na, g.goal_sodium_mg) + " %" : "sin datos"],
+    ["Purinas", pu, has ? Math.round(t.pur) + " / " + g.goal_purine_mg + " mg" : "sin datos"],
     ["Caminata " + g.goal_steps + " pasos", lv(steps, g.goal_steps, 0.5), pc(steps, g.goal_steps) + " %"],
     ["Agua", h.hydration ? 2 : 0, h.hydration ? "hecho" : "falta"],
     ["Medicación", h.meds ? 2 : 0, h.meds ? "hecho" : "falta"],
     ["Fuerza o descanso", d.training && d.training !== "Ninguno" ? 2 : 0, d.training && d.training !== "Ninguno" ? esc(d.training) : "sin registrar"],
-    ["Sueño 7 h", lv(sleep, 420, 0.85), sleep ? Math.round((sleep / 60) * 10) / 10 + " h" : "sin datos"],
+    ["Sueño 7 h (anoche)", lv(sleep, 420, 0.85), sleep ? Math.round((sleep / 60) * 10) / 10 + " h" : "sin datos"],
   ];
 }
 const SEM = [["#fee2e2", "#991b1b", "✗"], ["#fef3c7", "#92400e", "●"], ["#dcfce7", "#166534", "✓"]];
 function goalsHTML() {
   const l = goalsList(), ok = l.filter((x) => x[1] === 2).length;
-  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b> <span class="text-xs text-slate-400">verde cumplida · amarillo a medias · rojo falta</span></div>
+  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b> <span class="text-xs text-slate-400">verde cumplida · amarillo a medias · rojo falta · calorías: verde 75-100 %, amarillo hasta +10 % o 65-75 %</span></div>
     <div class="grid grid-cols-2 gap-1 text-xs">${l.map(([n, v, det]) => `<div class="rounded-lg px-2 py-1" style="background:${SEM[v][0]};color:${SEM[v][1]}">${SEM[v][2]} ${n} · ${det}</div>`).join("")}</div></div>`;
 }
 function walkSem(steps) {
@@ -192,7 +203,7 @@ function counterHTML() {
     ${macroRow("Proteína", t.p, g.goal_protein, " g", "#3b82f6")}
     ${macroRow("Carbohidratos", t.c, g.goal_carbs, " g", "#f97316")}
     ${macroRow("Grasas", t.f, g.goal_fat, " g", "#eab308")}
-    <div class="flex justify-between text-xs text-slate-300"><span>Sodio ${Math.round(t.na)} / ${g.goal_sodium_mg} mg</span></div>
+    <div class="flex flex-wrap justify-between gap-x-3 text-xs text-slate-300"><span class="${t.na > g.goal_sodium_mg ? "text-red-400" : ""}">Sodio ${Math.round(t.na)} / ${g.goal_sodium_mg} mg</span><span class="${t.pur > g.goal_purine_mg ? "text-red-400" : ""}">Purinas ${Math.round(t.pur)} / ${g.goal_purine_mg} mg</span><span class="${t.fru > g.goal_fructose_g ? "text-red-400" : ""}">Fructosa ${r1(t.fru)} / ${g.goal_fructose_g} g</span></div>
     <button id="m-now" class="btn bg-green-600 w-full">¿Qué me toca comer ahora?</button><div id="now-box"></div>
     ${goalsHTML()}<p class="text-sm italic text-slate-200 border-t border-slate-700 pt-2">${esc(tipText(t))}</p></div>`;
 }
@@ -202,7 +213,7 @@ function currentSlot() { const d = new Date(), h = d.getHours() + d.getMinutes()
 document.addEventListener("click", (e) => { if (e.target.closest("#m-now")) showNow(); });
 async function showNow() {
   const box = $("#now-box"); if (!box) return;
-  const wd = new Date().getDay(), day = wd === 0 || wd === 6 ? 1 : wd;
+  const day = new Date().getDay();
   const slot = currentSlot(), text = WEEKLY_MENU[day][slot];
   const g = S.profile, t = totals();
   box.innerHTML = `<div class="rounded-xl bg-slate-900 p-3 text-sm mt-2">Preparando la receta…</div>`;
@@ -355,7 +366,7 @@ async function prepImage(file, max = 1280, quality = 0.82) {
 async function viewComida() {
   $("#view").innerHTML = `<p class="text-slate-400 p-4">Cargando…</p>`;
   await loadDay();
-  const wd = new Date().getDay(); const day = wd === 0 || wd === 6 ? 1 : wd;
+  const day = new Date().getDay();
   $("#view").innerHTML = `<section class="space-y-4">
     ${counterHTML()}
     <div class="card space-y-3">
@@ -399,9 +410,9 @@ async function viewComida() {
     </div>
     <div id="draft"></div>
     <div class="card"><h2 class="font-bold mb-2">Comidas de hoy</h2><div id="meal-list" class="space-y-2"></div></div>
-    <div class="card"><div class="flex justify-between items-center mb-2"><h2 class="font-bold text-blue-300">Menú de la semana</h2>
+    <div class="card"><div class="flex justify-between items-center mb-2"><h2 class="font-bold text-blue-300">Menú de <span id="menu-title">${DIAS[day]}</span></h2>
       <select id="menu-day" class="bg-slate-900 border border-slate-600 rounded p-1 text-sm">
-        ${["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"].map((n, i) => `<option value="${i + 1}" ${day === i + 1 ? "selected" : ""}>${n}</option>`).join("")}</select></div>
+        ${[1, 2, 3, 4, 5, 6, 0].map((i) => `<option value="${i}" ${day === i ? "selected" : ""}>${DIAS[i]}${i === new Date().getDay() ? " (hoy)" : ""}</option>`).join("")}</select></div>
       <div id="menu" class="space-y-2"></div></div></section>`;
   renderMeals(); renderMenu(); renderDraft();
   $("#m-cam").onclick = () => $("#file-meal").click();
@@ -409,7 +420,7 @@ async function viewComida() {
   $("#man-ok").onclick = addManual;
   bindLabel();
   $("#m-txt").onclick = () => { const t = $("#m-text").value.trim(); if (t) runMeal({ note: t }); else toast("Escribe qué comiste."); };
-  $("#menu-day").onchange = renderMenu;
+  $("#menu-day").onchange = () => { $("#menu-title").textContent = DIAS[+$("#menu-day").value]; renderMenu(); };
 }
 for (const id of ["#file-meal", "#file-meal-gal"]) {
   $(id).addEventListener("change", async (e) => {
@@ -422,23 +433,46 @@ for (const id of ["#file-meal", "#file-meal-gal"]) {
 function cleanMeal(d) {
   const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0);
   const items = (Array.isArray(d?.items) ? d.items : []).map((i) => ({
-    name: String(i?.name ?? ""), grams: n(i?.grams), kcal: n(i?.kcal), protein_g: n(i?.protein_g), carbs_g: n(i?.carbs_g), fat_g: n(i?.fat_g), sodium_mg: n(i?.sodium_mg),
+    name: String(i?.name ?? ""), grams: n(i?.grams), kcal: n(i?.kcal), protein_g: n(i?.protein_g), carbs_g: n(i?.carbs_g), fat_g: n(i?.fat_g), sodium_mg: n(i?.sodium_mg), purine_mg: n(i?.purine_mg), fructose_g: n(i?.fructose_g),
   }));
   const ok = (v, list, def) => (list.includes(v) ? v : def);
   return {
     name: String(d?.name ?? "Comida"), meal_type: ok(d?.meal_type, ["Desayuno", "Comida", "Merienda", "Cena", "Snack"], "Comida"),
-    items, kcal: n(d?.kcal), protein_g: n(d?.protein_g), carbs_g: n(d?.carbs_g), fat_g: n(d?.fat_g), sodium_mg: n(d?.sodium_mg),
+    items, kcal: n(d?.kcal), protein_g: n(d?.protein_g), carbs_g: n(d?.carbs_g), fat_g: n(d?.fat_g), sodium_mg: n(d?.sodium_mg), purine_mg: n(d?.purine_mg) || items.reduce((s, i) => s + i.purine_mg, 0), fructose_g: n(d?.fructose_g) || items.reduce((s, i) => s + i.fructose_g, 0),
     purine_level: ok(d?.purine_level, ["low", "medium", "high"], null), confidence: ok(d?.confidence, ["low", "medium", "high"], "low"), notes: String(d?.notes ?? ""),
   };
 }
 async function runMeal({ img = null, note = "" }) {
   $("#m-busy")?.classList.remove("hidden");
   try {
-    const d = cleanMeal(await analyze("meal", { b64: img?.b64, mime: img?.mime, note }));
-    S.draft = { ...d, img, source: img ? "photo" : "text", mult: 1, base: { kcal: d.kcal, p: d.protein_g, c: d.carbs_g, f: d.fat_g, na: d.sodium_mg } };
+    let raw;
+    try { raw = await analyze("meal", { b64: img?.b64, mime: img?.mime, note }); } catch (e1) { toast("La IA está ocupada, reintento…", "ok", 3000); await new Promise((r) => setTimeout(r, 2500)); raw = await analyze("meal", { b64: img?.b64, mime: img?.mime, note }); }
+    const d = cleanMeal(raw);
+    S.draft = { ...d, img, source: img ? "photo" : "text", mult: 1, base: { kcal: d.kcal, p: d.protein_g, c: d.carbs_g, f: d.fat_g, na: d.sodium_mg, pur: d.purine_mg, fru: d.fructose_g } };
     renderDraft();
   } catch (e) { toast("Análisis falló: " + e.message, "err", 6000); }
   $("#m-busy")?.classList.add("hidden");
+}
+function purPanel() {
+  const d = S.draft, box = $("#pur-panel"); if (!d || !box) return;
+  const g = S.profile, t = totals(), m = d.mult || 1;
+  const rows = [
+    ["Purinas", "mg", t.pur, (+d.purine_mg || PUR_LEVEL[d.purine_level] || 0) * m, g.goal_purine_mg, "purine_mg"],
+    ["Fructosa", "g", t.fru, (+d.fructose_g || 0) * m, g.goal_fructose_g, "fructose_g"],
+    ["Sodio", "mg", t.na, (+d.sodium_mg || 0) * m, g.goal_sodium_mg, "sodium_mg"],
+  ];
+  let over = false; const fix = [];
+  const html = rows.map(([lab, u, hoy, esta, lim, key]) => {
+    const tot = hoy + esta, pct = lim > 0 ? Math.round((tot / lim) * 100) : 0, left = lim - tot, v = tot <= lim ? 2 : tot <= lim * 1.15 ? 1 : 0;
+    if (tot > lim) {
+      over = true; let need = tot - lim;
+      const its = [...(d.items || [])].map((i) => ({ n: i.name, x: (+i[key] || 0) * m })).filter((i) => i.x > 0).sort((a, b) => b.x - a.x);
+      const pick = []; for (const i of its) { if (need <= 0) break; pick.push(i); need -= i.x; }
+      fix.push(pick.length ? lab + ": quita " + pick.map((i) => i.n + " (−" + Math.round(i.x) + " " + u + ")").join(" y ") : lab + ": reduce la porción");
+    }
+    return `<div class="rounded-lg px-2 py-1" style="background:${SEM[v][0]};color:${SEM[v][1]}"><div class="flex justify-between"><b>${SEM[v][2]} ${lab}</b><span>${Math.round(esta * 10) / 10} ${u} esta comida</span></div><div class="text-xs">Hoy ${Math.round(hoy)} → ${Math.round(tot)} de ${lim} ${u} (${pct} %) · ${left >= 0 ? "te quedan " + Math.round(left) : "te pasas " + Math.round(-left)} ${u}</div></div>`;
+  }).join("");
+  box.innerHTML = `<div class="text-xs font-bold uppercase text-orange-300">Antes de comer: purinas, ácido úrico y sodio</div><div class="space-y-1 text-sm">${html}</div>${over ? `<div class="rounded-lg bg-red-900/60 p-2 text-xs"><b>Para quedar dentro del límite:</b><br>${fix.map(esc).join("<br>")}</div>` : `<div class="rounded-lg bg-green-900/50 p-2 text-xs">Dentro de tus límites de hoy: puedes comerlo.</div>`}`;
 }
 function renderDraft() {
   const box = $("#draft"); if (!box) return;
@@ -447,10 +481,11 @@ function renderDraft() {
   const types = ["Desayuno", "Comida", "Merienda", "Cena", "Snack"];
   const pur = d.purine_level === "high" ? `<span class="bg-red-800 text-xs px-2 py-1 rounded-full">Purinas altas</span>` : d.purine_level === "medium" ? `<span class="bg-amber-800 text-xs px-2 py-1 rounded-full">Purinas medias</span>` : "";
   box.innerHTML = `<div class="card space-y-3 border-orange-500">
-    <div class="flex justify-between items-start gap-2"><div><b>Revisa y confirma</b><p class="text-xs text-slate-400">Confianza de la IA: ${esc(d.confidence)}</p></div>${pur}</div>
+    <div class="flex justify-between items-start gap-2"><div><b>Antes de comer: revisa y confirma</b><p class="text-xs text-slate-400">Confianza de la IA: ${esc(d.confidence)}</p></div>${pur}</div>
     ${d.img ? `<img src="${URL.createObjectURL(d.img.blob)}" class="rounded-xl max-h-48 w-full object-cover">` : ""}
+    <div id="pur-panel" class="space-y-2"></div>
     <input id="d-name" class="inp" value="${esc(d.name)}">
-    <ul class="text-xs text-slate-300 space-y-1">${(d.items || []).map((i) => `<li>${esc(i.name)} · ${Math.round(i.grams)} g · ${Math.round(i.kcal)} kcal · ${r1(i.protein_g)} P</li>`).join("")}</ul>
+    <ul class="text-xs text-slate-300 space-y-1">${(d.items || []).map((i) => `<li>${esc(i.name)} · ${Math.round(i.grams)} g · ${Math.round(i.kcal)} kcal · ${r1(i.protein_g)} P · ${Math.round(i.purine_mg || 0)} mg pur · ${r1(i.fructose_g || 0)} g fruc</li>`).join("")}</ul>
     ${d.notes ? `<p class="text-xs text-slate-400">${esc(d.notes)}</p>` : ""}
     <div class="grid grid-cols-2 gap-2">
       <select id="d-type" class="inp">${types.map((t) => `<option ${t === d.meal_type ? "selected" : ""}>${t}</option>`).join("")}</select>
@@ -461,8 +496,10 @@ function renderDraft() {
   $("#d-mult").onchange = (e) => {
     const m = +e.target.value; d.mult = m;
     const b = d.base;
-    $("#d-kcal").value = Math.round(b.kcal * m); $("#d-p").value = r1(b.p * m); $("#d-c").value = r1(b.c * m); $("#d-f").value = r1(b.f * m); $("#d-na").value = Math.round((b.na || 0) * m);
+    $("#d-kcal").value = Math.round(b.kcal * m); $("#d-p").value = r1(b.p * m); $("#d-c").value = r1(b.c * m); $("#d-f").value = r1(b.f * m); $("#d-na").value = Math.round((b.na || 0) * m); purPanel();
   };
+  $("#d-na").addEventListener("input", () => { d.sodium_mg = (num($("#d-na").value) || 0) / (d.mult || 1); purPanel(); });
+  purPanel();
   $("#d-no").onclick = () => { S.draft = null; renderDraft(); };
   $("#d-ok").onclick = saveMeal;
 }
@@ -476,11 +513,11 @@ async function saveMeal() {
       if (error) { toast("Foto no subida: " + error.message, "err"); photo_path = null; }
     }
     const m = d.mult || 1;
-    const items = (d.items || []).map((i) => ({ ...i, grams: r1(i.grams * m), kcal: Math.round(i.kcal * m), protein_g: r1(i.protein_g * m), carbs_g: r1(i.carbs_g * m), fat_g: r1(i.fat_g * m), sodium_mg: Math.round((i.sodium_mg || 0) * m) }));
+    const items = (d.items || []).map((i) => ({ ...i, grams: r1(i.grams * m), kcal: Math.round(i.kcal * m), protein_g: r1(i.protein_g * m), carbs_g: r1(i.carbs_g * m), fat_g: r1(i.fat_g * m), sodium_mg: Math.round((i.sodium_mg || 0) * m), purine_mg: Math.round((i.purine_mg || 0) * m), fructose_g: r1((i.fructose_g || 0) * m) }));
     await q(sb.from("meals").insert({
       user_id: S.user.id, log_date: S.date, meal_type: $("#d-type").value, name: $("#d-name").value.trim() || "Comida",
       items, kcal: num($("#d-kcal").value) || 0, protein_g: num($("#d-p").value) || 0, carbs_g: num($("#d-c").value) || 0,
-      fat_g: num($("#d-f").value) || 0, sodium_mg: num($("#d-na").value) || 0, purine_level: d.purine_level || null,
+      fat_g: num($("#d-f").value) || 0, sodium_mg: num($("#d-na").value) || 0, purine_level: d.purine_level || null, purine_mg: Math.round((+d.purine_mg || 0) * m * 10) / 10, fructose_g: Math.round((+d.fructose_g || 0) * m * 10) / 10,
       photo_path, source: d.source, confidence: d.confidence,
     }));
     S.draft = null; $("#m-text").value = "";
