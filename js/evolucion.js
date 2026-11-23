@@ -9,6 +9,7 @@ export function createEvolucion(ctx) {
   const COLORS = ["#f59e0b", "#3b82f6", "#60a5fa", "#22c55e", "#4ade80", "#ef4444"];
 
   let rows = [];
+  let bodies = [];
   let urls = {};
   let pending = {};
 
@@ -32,6 +33,7 @@ export function createEvolucion(ctx) {
     try {
       rows = await q(sb.from("progress_checkins").select("*").order("date"));
       await sign(rows.flatMap((r) => Object.values(r.photos || {})));
+      bodies = await q(sb.from("body_metrics").select("*").not("weight_kg", "is", null).order("date"));
     } catch (e) { toast("No se pudo cargar: " + e.message, "err", 6000); rows = []; }
 
     const isMonday = new Date().getDay() === 1;
@@ -53,6 +55,7 @@ export function createEvolucion(ctx) {
           <input type="file" accept="image/*" id="e-f-${a}" class="hidden"><span class="btn bg-slate-700 block text-center mt-1 text-sm">Elegir foto</span></label></div>`).join("")}</div>
         <button id="e-save" class="btn bg-green-600 w-full">Guardar semana</button>
       </div>
+      <div id="e-body"></div>
       <div id="e-compare"></div>
       <div id="e-chart"></div>
       <div id="e-list"></div></section>`;
@@ -61,7 +64,7 @@ export function createEvolucion(ctx) {
     ANG.forEach(([a]) => { $("#e-f-" + a).onchange = (ev) => onPhoto(a, ev); });
     $("#e-save").onclick = save;
     fillForm($("#e-date").value);
-    renderCompare(); renderChart(); renderList();
+    renderBody(); renderCompare(); renderChart(); renderList();
   }
 
   function fillForm(date) {
@@ -100,6 +103,52 @@ export function createEvolucion(ctx) {
       await view();
       $("#e-date").value = date; fillForm(date);
     } catch (e) { toast("No se guardó: " + e.message, "err", 6000); }
+  }
+
+
+  /* ---------- Composición corporal (Fitdays): todos los indicadores, antes y después ---------- */
+  // dir: -1 mejora si baja, 1 mejora si sube, 0 neutro
+  const BODY = [
+    ["weight_kg", "Peso", "kg", -1], ["bmi", "IMC", "", -1], ["body_fat_pct", "Grasa corporal", "%", -1], ["fat_mass_kg", "Masa grasa", "kg", -1],
+    ["fat_free_mass_kg", "Peso sin grasa", "kg", 0], ["muscle_kg", "Masa muscular", "kg", 1], ["skeletal_muscle_kg", "Músculo esquelético", "kg", 1],
+    ["bone_mass_kg", "Masa esquelética", "kg", 0], ["protein_kg", "Cantidad de proteína", "kg", 1], ["water_pct", "Agua corporal", "%", 1],
+    ["subcutaneous_fat_pct", "Grasa subcutánea", "%", -1], ["visceral_fat", "Grasa visceral", "", -1], ["bmr", "BMR", "kcal", 0],
+    ["body_age", "Edad corporal", "", -1], ["whr", "WHR (cintura/cadera)", "", -1], ["asmi", "ASMI", "", 1], ["body_score", "Puntuación corporal", "", 1],
+  ];
+  function renderBody() {
+    const box = $("#e-body");
+    if (!bodies.length) { box.innerHTML = ""; return; }
+    const opts = (sel) => bodies.map((r) => `<option value="${r.date}" ${r.date === sel ? "selected" : ""}>${fdate(r.date)}</option>`).join("");
+    const a0 = bodies[0].date, b0 = bodies[bodies.length - 1].date;
+    box.innerHTML = `<div class="card space-y-3"><h2 class="font-bold text-sky-300">Composición corporal (Fitdays)</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="block text-xs text-slate-300 mb-1">Antes</label><select id="b-a" class="inp">${opts(a0)}</select></div>
+        <div><label class="block text-xs text-slate-300 mb-1">Después</label><select id="b-b" class="inp">${opts(b0)}</select></div></div>
+      <div id="b-sum" class="text-sm"></div><div id="b-tab" class="overflow-x-auto"></div></div>`;
+    $("#b-a").onchange = drawBody; $("#b-b").onchange = drawBody;
+    drawBody();
+  }
+  function drawBody() {
+    const A = bodies.find((r) => r.date === $("#b-a").value), B = bodies.find((r) => r.date === $("#b-b").value);
+    if (!A || !B) return;
+    const val = (r, k) => (r[k] != null && r[k] !== "" ? +r[k] : null);
+    const days = Math.round((new Date(B.date) - new Date(A.date)) / 864e5);
+    const dW = val(B, "weight_kg") - val(A, "weight_kg"), dF = val(B, "fat_mass_kg") != null && val(A, "fat_mass_kg") != null ? val(B, "fat_mass_kg") - val(A, "fat_mass_kg") : null;
+    const dM = val(B, "muscle_kg") != null && val(A, "muscle_kg") != null ? val(B, "muscle_kg") - val(A, "muscle_kg") : null;
+    let sum = "";
+    if (A.date !== B.date) {
+      sum = `En ${days} días: peso <b>${dW > 0 ? "+" : ""}${r1(dW)} kg</b>${dF != null ? `, grasa <b>${dF > 0 ? "+" : ""}${r1(dF)} kg</b>` : ""}${dM != null ? `, músculo <b>${dM > 0 ? "+" : ""}${r1(dM)} kg</b>` : ""}.`;
+      if (dW < 0 && dM != null && dM < 0 && Math.abs(dM) / Math.abs(dW) > 0.3) sum += ` <span class="text-amber-300">Más de un tercio de lo que bajaste es músculo (${Math.round((Math.abs(dM) / Math.abs(dW)) * 100)} %): sube la proteína y no te saltes la fuerza.</span>`;
+      else if (dW < 0 && dF != null && dF < 0) sum += ` <span class="text-green-400">${Math.round((Math.abs(dF) / Math.abs(dW)) * 100)} % de lo que bajaste es grasa.</span>`;
+    }
+    const cell = (r, k, u) => { const v = val(r, k); return v == null ? "-" : r1(v) + (u && u !== "kcal" ? " " + u : ""); };
+    $("#b-sum").innerHTML = sum;
+    $("#b-tab").innerHTML = `<table class="w-full text-sm whitespace-nowrap"><thead class="text-xs text-slate-300"><tr><th class="text-left">Indicador</th><th>${fdate(A.date)}</th><th>${fdate(B.date)}</th><th>Variación</th></tr></thead><tbody>
+      ${BODY.map(([k, l, u, dir]) => {
+        const x = val(A, k), y = val(B, k), d = x != null && y != null ? r1(y - x) : null;
+        const col = d == null || d === 0 || dir === 0 ? "text-slate-400" : (d < 0) === (dir < 0) ? "text-green-500" : "text-red-500";
+        return `<tr class="border-t border-slate-700 text-center"><td class="text-left py-1">${l}</td><td>${cell(A, k, u)}</td><td>${cell(B, k, u)}</td><td class="${col} font-semibold">${d == null ? "-" : (d > 0 ? "▲ +" : d < 0 ? "▼ " : "") + d}</td></tr>`;
+      }).join("")}</tbody></table>`;
   }
 
   function renderCompare() {
