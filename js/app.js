@@ -50,15 +50,8 @@ const S = {
 };
 
 const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-const WEEKLY_MENU = {
-  6: ["1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %","2 hamburguesas magras + 150 g arroz + 1/2 aguacate","2 huevos duros + 1 pera + 1 vaso de leche descremada","250 g de yogur 0,0 % + 1 manzana asada con canela"],
-  0: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %","2 hamburguesas magras + 150 g porotos + setas","2 huevos duros + 200 g de piña + 100 g cottage 0 %","Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
-  1: ["3 tostadas integrales + 220 g cottage 0 % + 2 huevos + 1/2 aguacate", "2 hamburguesas magras + 150 g lentejas + setas y cherrys salteados", "2 huevos duros + 200 g de piña + 1 vaso de leche descremada", "250 g de yogur 0,0 % + 1 manzana asada con canela"],
-  2: ["Café + 3 huevos revueltos + 2 tostadas integrales + 100 g cottage 0 %", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + manzana + 1 vaso de leche descremada", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 100 g de pollo desmenuzado"],
-  3: ["1 panecillo tostado + 2 huevos + 150 g cottage 0 % + 1 pera", "2 hamburguesas magras + 200 g lentejas salteadas con setas", "2 huevos duros + 200 g de piña + 100 g cottage 0 %", "Tortilla francesa de 1 huevo y 3 claras + 150 g de calabacín cocido"],
-  4: ["Café con leche + 3 huevos revueltos + 2 tostadas integrales + manzana", "2 hamburguesas magras + 150 g arroz + 1/2 aguacate", "2 huevos duros + 1 pera + 1 vaso de leche descremada", "2 rebanadas de pan tostado con 150 g de cottage 0 % + 1 manzana"],
-  5: ["1 panecillo tostado + 3 huevos revueltos + 100 g cottage 0 %", "2 hamburguesas magras + 150 g porotos + setas", "2 huevos duros + manzana + 100 g cottage 0 %", "Caldo de pollo Gallina Blanca + 40 g de fideos cabello de ángel + 1 huevo pochado + 1 manzana"],
-};
+const PLANS = {"PLAN_A":{"0":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","Tortilla de 3 huevos con 150 g de setas + 150 g de arroz basmati + 200 g de brócoli + 1 loncha de edam","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 4 claras revueltas + 150 g de setas + 200 g de brócoli + 1 tostada integral"],"1":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","150 g de arroz basmati + 3 huevos revueltos + 150 g de setas + 200 g de brócoli + 1 loncha de edam","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: tortilla de 1 huevo y 3 claras + 200 g de brócoli + 1 tostada integral"],"2":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","Media pinsa de Aldi con tomate, 30 g de provolone y 100 g de shiitake + 1 huevo duro","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 200 g de skyr natural + 200 g de judías verdes + 1 tostada integral"],"3":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","2 porciones de tortilla de patatas de mamá + 200 g de brócoli + 1 yogur Milsani con fruta","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 2 huevos duros + 200 g de judías verdes + 1 yogur Milsani con fruta"],"4":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","150 g de arroz basmati + 3 huevos + 150 g de setas + 200 g de judías verdes + 1 loncha de edam","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 4 claras revueltas + 150 g de setas + 200 g de brócoli + 1 tostada integral"],"5":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","80 g de burrata con tomate + 2 huevos duros + 200 g de brócoli + 1 tostada integral","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 200 g de skyr natural + 200 g de judías verdes + 1 tostada integral"],"6":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","Media pinsa de Aldi con tomate, 2 huevos y 100 g de shiitake + 200 g de judías verdes","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 2 huevos duros + 200 g de judías verdes + 1 yogur Milsani con fruta"]},"PLAN_B":{"0":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","120 g de ternera magra + 150 g de arroz basmati + 200 g de brócoli + 2 huevos duros","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 4 claras revueltas + 150 g de setas + 200 g de brócoli + 1 tostada integral"],"1":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","150 g de arroz basmati + 3 huevos revueltos + 150 g de setas + 200 g de brócoli + 1 loncha de edam","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: tortilla de 1 huevo y 3 claras + 200 g de brócoli + 1 tostada integral"],"2":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","Media pinsa de Aldi con tomate, 30 g de provolone y 100 g de shiitake + 1 huevo duro","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 200 g de skyr natural + 200 g de judías verdes + 1 tostada integral"],"3":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","2 porciones de tortilla de patatas de mamá + 200 g de brócoli + 1 yogur Milsani con fruta","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 2 huevos duros + 200 g de judías verdes + 1 yogur Milsani con fruta"],"4":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","150 g de arroz basmati + 2 huevos + 1 lata de atún al natural + mayonesa casera + 200 g de judías verdes","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 4 claras revueltas + 150 g de setas + 200 g de brócoli + 1 tostada integral"],"5":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","80 g de burrata con tomate + 2 huevos duros + 200 g de brócoli + 1 tostada integral","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 200 g de skyr natural + 200 g de judías verdes + 1 tostada integral"],"6":["Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %","1 hamburguesa bio de Aldi + 150 g de arroz basmati + 200 g de judías verdes + 2 huevos duros","2 yogures Milsani con fruta 0 % + 200 g de skyr natural","Cena ligera: 2 huevos duros + 200 g de judías verdes + 1 yogur Milsani con fruta"]}};
+const weeklyMenu = () => PLANS[S.profile.diet_plan === "B" ? "B" : "A"];
 
 const FIT = [
   ["weight_kg", "Peso (kg)"], ["body_fat_pct", "Grasa (%)"], ["fat_mass_kg", "Grasa (kg)"], ["muscle_kg", "Masa muscular (kg)"],
@@ -97,6 +90,7 @@ async function start() {
     let p = await q(sb.from("profiles").select("*").eq("id", S.user.id).maybeSingle());
     if (!p) p = await q(sb.from("profiles").upsert({ id: S.user.id }).select().single());
     S.profile = { ...GOAL_DEFAULT, ...p };
+    S.profile.goal_purine_mg = S.profile.diet_plan === "B" ? 250 : 150;
   } catch (e) { toast("Perfil: " + e.message, "err"); }
   loadMedia(); loadLastSets();
   go(S.tab);
@@ -113,6 +107,7 @@ async function loadDay() {
       q(sb.from("meals").select("*").eq("log_date", d).order("created_at")),
     ]);
     S.daily = daily; S.metric = metric; S.meals = meals;
+    await loadWeek();
     try { const pd = new Date(d + "T12:00:00"); pd.setDate(pd.getDate() - 1); S.prevDaily = await q(sb.from("daily_logs").select("sleep_minutes,sleep_score,date").eq("date", pd.toISOString().slice(0, 10)).maybeSingle()); } catch { S.prevDaily = null; }
     setSync("#22c55e");
   } catch (e) { setSync("#ef4444"); toast("Sin conexión o error: " + e.message, "err"); }
@@ -144,6 +139,47 @@ async function go(tab) {
   await VIEWS[tab]();
 }
 
+/* ---------- V24: semana, actividad y déficit ---------- */
+const mondayOf = (ds) => { const d = new Date(ds + "T12:00:00"); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.toISOString().slice(0, 10); };
+const addDays = (ds, n) => { const d = new Date(ds + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const BMR_FACTOR = 1.2; // gasto base = metabolismo basal x 1,2 (vida sedentaria) + calorías activas
+const MET = { "Golf andando": 4.3, "Golf con carrito": 3.5, "Caminata": 3.8, "Fuerza": 3.5, "Otra": 4 };
+async function loadWeek() {
+  try {
+    const from = addDays(S.date, -6);
+    const [ml, dl, bm] = await Promise.all([
+      q(sb.from("meals").select("log_date,kcal").gte("log_date", from).lte("log_date", S.date)),
+      q(sb.from("daily_logs").select("date,steps,workout_type,workout_kcal,active_kcal").gte("date", from).lte("date", S.date)),
+      q(sb.from("body_metrics").select("date,weight_kg,bmr").not("weight_kg", "is", null).order("date", { ascending: false }).limit(1)),
+    ]);
+    const eaten = {}; ml.forEach((m) => (eaten[m.log_date] = (eaten[m.log_date] || 0) + +m.kcal));
+    S.week = { from, eaten, daily: Object.fromEntries(dl.map((x) => [x.date, x])), weight: bm[0] && bm[0].weight_kg ? +bm[0].weight_kg : 127, bmr: bm[0] && bm[0].bmr ? +bm[0].bmr : 2225 };
+  } catch { S.week = null; }
+}
+function activeKcal(d, w) {
+  d = d || {};
+  const sk = (d.steps || 0) * 0.000375 * w, wk = d.workout_kcal || 0;
+  return Math.round(/golf|camin|walk/i.test(d.workout_type || "") ? Math.max(sk, wk) : sk + wk);
+}
+function deficitOf(eaten, d) {
+  const W = S.week || { weight: 127, bmr: 2225 };
+  return Math.round(W.bmr * BMR_FACTOR + activeKcal(d, W.weight) - eaten);
+}
+function deficitInfo() {
+  const W = S.week; if (!W) return null;
+  const todayEaten = totals().kcal, d = S.daily || {};
+  const closed = S.date < todayStr() || new Date().getHours() >= 21;
+  const hoy = deficitOf(todayEaten, d);
+  let tot = 0, n = 0;
+  for (let i = 0; i < 7; i++) {
+    const ds = addDays(S.date, -i), eaten = ds === S.date ? todayEaten : W.eaten[ds];
+    if (!eaten || (ds === S.date && !closed)) continue;
+    tot += deficitOf(eaten, ds === S.date ? d : W.daily[ds]); n++;
+  }
+  return { hoy, closed, week: tot, n, avg: n ? tot / n : 0 };
+}
+const defLevel = (v) => (v >= 300 && v <= 900 ? 2 : (v >= 100 && v < 300) || (v > 900 && v <= 1100) ? 1 : 0);
+
 /* ---------- contador de macros ---------- */
 function macroRow(label, val, goal, unit, color) {
   const rem = goal - val, pct = Math.min(100, (val / goal) * 100);
@@ -171,6 +207,7 @@ function goalsList() {
   const steps = d.steps || 0, sleep = d.sleep_minutes || (S.prevDaily && S.prevDaily.sleep_minutes) || 0;
   const kr = g.goal_kcal > 0 ? t.kcal / g.goal_kcal : 0;
   const kc = has ? (kr >= 0.75 && kr <= 1 ? 2 : (kr > 1 && kr <= 1.1) || (kr >= 0.65 && kr < 0.75) ? 1 : 0) : 0;
+  const di = deficitInfo(), nn = ["screens", "bed", "read"].filter((k) => h[k]).length;
   const pu = has ? (t.pur <= g.goal_purine_mg ? 2 : t.pur <= g.goal_purine_mg * 1.15 ? 1 : 0) : 0;
   const na = has ? (t.na <= g.goal_sodium_mg ? 2 : t.na <= g.goal_sodium_mg * 1.15 ? 1 : 0) : 0;
   return [
@@ -178,6 +215,9 @@ function goalsList() {
     ["Proteína", lv(t.p, g.goal_protein * 0.95, 0.7), pc(t.p, g.goal_protein) + " %"],
     ["Sodio", na, has ? pc(t.na, g.goal_sodium_mg) + " %" : "sin datos"],
     ["Purinas", pu, has ? Math.round(t.pur) + " / " + g.goal_purine_mg + " mg" : "sin datos"],
+    ["Déficit hoy", di ? (di.closed ? defLevel(di.hoy) : 1) : 1, di ? (di.closed ? "" : "en curso · ") + Math.round(di.hoy) + " kcal" : "sin datos"],
+    ["Déficit semana", di && di.n ? defLevel(di.avg) : 1, di && di.n ? "media " + Math.round(di.avg) + "/día · ≈ " + r1(di.week / 7700) + " kg" : "sin datos"],
+    ["Rutina de noche", nn === 3 ? 2 : nn > 0 ? 1 : 0, nn + "/3"],
     ["Caminata " + g.goal_steps + " pasos", lv(steps, g.goal_steps, 0.5), pc(steps, g.goal_steps) + " %"],
     ["Agua", h.hydration ? 2 : 0, h.hydration ? "hecho" : "falta"],
     ["Medicación", h.meds ? 2 : 0, h.meds ? "hecho" : "falta"],
@@ -188,7 +228,7 @@ function goalsList() {
 const SEM = [["#fee2e2", "#991b1b", "✗"], ["#fef3c7", "#92400e", "●"], ["#dcfce7", "#166534", "✓"]];
 function goalsHTML() {
   const l = goalsList(), ok = l.filter((x) => x[1] === 2).length;
-  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b> <span class="text-xs text-slate-400">verde cumplida · amarillo a medias · rojo falta · calorías: verde 75-100 %, amarillo hasta +10 % o 65-75 %</span></div>
+  return `<div class="border-t border-slate-700 pt-2"><div class="text-sm mb-2"><b>Metas de hoy: ${ok}/${l.length}</b> <span class="text-xs text-slate-400">verde cumplida · amarillo a medias · rojo falta · calorías: verde 75-100 %, amarillo hasta +10 % o 65-75 %. Déficit: verde 300-900 kcal/día</span></div>
     <div class="grid grid-cols-2 gap-1 text-xs">${l.map(([n, v, det]) => `<div class="rounded-lg px-2 py-1" style="background:${SEM[v][0]};color:${SEM[v][1]}">${SEM[v][2]} ${n} · ${det}</div>`).join("")}</div></div>`;
 }
 function walkSem(steps) {
@@ -204,6 +244,7 @@ function counterHTML() {
     ${macroRow("Carbohidratos", t.c, g.goal_carbs, " g", "#f97316")}
     ${macroRow("Grasas", t.f, g.goal_fat, " g", "#eab308")}
     <div class="flex flex-wrap justify-between gap-x-3 text-xs text-slate-300"><span class="${t.na > g.goal_sodium_mg ? "text-red-400" : ""}">Sodio ${Math.round(t.na)} / ${g.goal_sodium_mg} mg</span><span class="${t.pur > g.goal_purine_mg ? "text-red-400" : ""}">Purinas ${Math.round(t.pur)} / ${g.goal_purine_mg} mg</span><span class="${t.fru > g.goal_fructose_g ? "text-red-400" : ""}">Fructosa ${r1(t.fru)} / ${g.goal_fructose_g} g</span></div>
+    ${(() => { const di = deficitInfo(); return di ? `<div class="text-xs text-slate-300">Déficit estimado hoy: <b>${Math.round(di.hoy)} kcal</b>${di.closed ? "" : " (en curso)"} · semana: ${di.n ? Math.round(di.avg) + " kcal/día" : "sin datos"}</div>` : ""; })()}
     <button id="m-now" class="btn bg-green-600 w-full">¿Qué me toca comer ahora?</button><div id="now-box"></div>
     ${goalsHTML()}<p class="text-sm italic text-slate-200 border-t border-slate-700 pt-2">${esc(tipText(t))}</p></div>`;
 }
@@ -214,7 +255,7 @@ document.addEventListener("click", (e) => { if (e.target.closest("#m-now")) show
 async function showNow() {
   const box = $("#now-box"); if (!box) return;
   const day = new Date().getDay();
-  const slot = currentSlot(), text = WEEKLY_MENU[day][slot];
+  const slot = currentSlot(), text = weeklyMenu()[day][slot];
   const g = S.profile, t = totals();
   box.innerHTML = `<div class="rounded-xl bg-slate-900 p-3 text-sm mt-2">Preparando la receta…</div>`;
   let rec = lsGet("recipe_" + text, null);
@@ -230,7 +271,7 @@ async function showNow() {
     <button id="now-ate" class="btn bg-orange-600 w-full">Ya lo comí: agregar</button></div>`;
   $("#now-ate").onclick = async () => {
     const m = MENU_MACROS[text];
-    if (m) { await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][slot], text, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur }); box.innerHTML = ""; return; }
+    if (m) { await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][slot], text, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur, pm: m.pm, fr: m.fr }); box.innerHTML = ""; return; }
     await go("comida"); runMeal({ note: text });
   };
 }
@@ -247,10 +288,25 @@ async function viewHoy() {
   const chk = (id, label, on) => `<label class="flex items-center gap-3 p-2"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span>${label}</span></label>`;
   const tr = d.training || "Ninguno";
   const weekHTML = await semana.card();
+  let wnote = "", gout = null, lab = null;
+  try { const wn = await q(sb.from("weekly_notes").select("notes").eq("week_start", mondayOf(S.date)).maybeSingle()); wnote = (wn && wn.notes) || ""; } catch { /* opcional */ }
+  try { [gout, lab] = await Promise.all([q(sb.from("gout_events").select("*").order("date", { ascending: false }).limit(1)), q(sb.from("lab_results").select("*").order("date", { ascending: false }).limit(1))]); } catch { /* opcional */ }
+  const actTypes = ["", "Golf andando", "Golf con carrito", "Caminata", "Fuerza", "Otra"]; if (d.workout_type && !actTypes.includes(d.workout_type)) actTypes.push(d.workout_type);
   $("#view").innerHTML = `<section class="space-y-4">
     ${weekHTML}
     <div class="card"><label class="block text-sm font-semibold mb-1">Fecha</label><input type="date" id="date" class="inp" value="${S.date}"></div>
     ${counterHTML()}
+    <div class="card space-y-2"><h2 class="font-bold text-amber-300">Mi día</h2>
+      <label class="block text-xs text-slate-300">¿Qué tienes planeado hoy? (trabajo, casa, actividad)</label>
+      <textarea id="n-plan" rows="2" class="inp">${esc(d.plan_text || "")}</textarea>
+      <label class="block text-xs text-slate-300">Incidencias del día y cómo arrancas</label>
+      <textarea id="n-inc" rows="2" class="inp">${esc(d.incidents || "")}</textarea>
+      <label class="block text-xs text-slate-300">Nota del día</label>
+      <textarea id="n-day" rows="2" class="inp">${esc(d.notes || "")}</textarea>
+      <label class="block text-xs text-slate-300">Nota de la semana (la lee el resumen del lunes)</label>
+      <textarea id="n-week" rows="2" class="inp">${esc(wnote)}</textarea>
+      <p class="text-xs text-slate-400">Se guardan con el botón "Guardar el día". También puedes mandarlas al bot: "plan: ...", "incidencia: ...", "nota: ...".</p>
+    </div>
     <div class="card space-y-3">
       <div class="flex justify-between items-center"><h2 class="font-bold text-blue-300">Báscula Fitdays</h2>
         <button id="fit-up" class="btn bg-blue-600 text-sm">📷 Subir captura</button></div>
@@ -266,17 +322,36 @@ async function viewHoy() {
       ${chk("h-hyd", "Agua 3.5 L + sal según indicación", h.hydration)}
       ${chk("h-meds", "Medicación tomada", h.meds)}
       ${chk("h-pro", "Meta de proteína alcanzada", h.protein)}
+      ${chk("h-scr", "Pantallas fuera a las 22:00", h.screens)}
+      ${chk("h-bed", "En cama a las 23:00-23:30", h.bed)}
+      ${chk("h-read", "Lectura de noche", h.read)}
       <div class="pt-3 border-t border-slate-700 space-y-2"><b>Entrenamiento</b>
         ${["Ninguno", "Rutina A", "Rutina B", "Fuerza", "Descanso"].map((x) => `<label class="flex items-center gap-3"><input type="radio" name="tr" value="${x}" ${tr === x ? "checked" : ""} style="width:1.4rem;height:1.4rem"><span>${x === "Ninguno" ? "Sin registrar" : x === "Fuerza" ? "Fuerza (otra)" : x === "Descanso" ? "Día de descanso" : x}</span></label>`).join("")}
       </div>
     </div>
     ${d.workout_min || d.exercise_min ? `<div class="card text-sm"><b class="text-orange-300">Ejercicio detectado</b><br>${d.workout_min ? `${esc(d.workout_type || "Actividad")}: ${d.workout_min} min${d.workout_km ? ` · ${d.workout_km} km` : ""}${d.workout_kcal ? ` · ${d.workout_kcal} kcal` : ""}<br>` : ""}${d.exercise_min ? `Ejercicio del día: ${d.exercise_min} min` : ""}</div>` : ""}
+    <div class="card space-y-2"><h2 class="font-bold text-orange-300">Actividad y calorías quemadas</h2>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-300 mb-1">Actividad</label><select id="a-type" class="inp">${actTypes.map((x) => `<option value="${esc(x)}" ${(d.workout_type || "") === x ? "selected" : ""}>${x || "Ninguna"}</option>`).join("")}</select></div>
+        <div><label class="block text-xs text-slate-300 mb-1">Minutos</label><input id="a-min" inputmode="numeric" class="inp" value="${d.workout_min ?? ""}"></div></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div><label class="block text-xs text-slate-300 mb-1">kcal activas</label><input id="a-kcal" inputmode="numeric" class="inp" value="${d.workout_kcal ?? ""}"></div>
+        <div class="flex items-end"><button id="a-calc" class="btn bg-slate-700 w-full">Calcular</button></div></div>
+      <p class="text-xs text-slate-400">Cálculo estimado con tu peso (${S.week ? S.week.weight : 127} kg): golf andando con palos unas 420 kcal por hora. Los pasos ya cuentan solos para el déficit.</p>
+    </div>
     <div class="card space-y-3"><h2 class="font-bold text-indigo-300">Sueño</h2>
       <p class="text-xs text-slate-400">Se rellena solo si mandas la captura de Huawei Health al bot. También puedes escribirlo.</p>
       <div class="grid grid-cols-3 gap-3">
         <div><label class="block text-xs text-slate-300 mb-1">Horas</label><input id="s-hours" inputmode="decimal" class="inp" value="${d.sleep_minutes ? r1(d.sleep_minutes / 60) : ""}"></div>
         <div><label class="block text-xs text-slate-300 mb-1">Puntuación</label><input id="s-score" inputmode="numeric" class="inp" value="${d.sleep_score ?? ""}"></div>
         <div><label class="block text-xs text-slate-300 mb-1">FC reposo</label><input id="s-hr" inputmode="numeric" class="inp" value="${d.resting_hr ?? ""}"></div></div></div>
+    <div class="card space-y-2"><h2 class="font-bold text-rose-300">Gota y análisis</h2>
+      <p class="text-xs text-slate-300">${gout && gout[0] ? `Última crisis: ${fdate(gout[0].date)} (${esc(gout[0].joint || "sin dato")}, dolor ${gout[0].pain ?? "?"}/10).` : "Sin crisis registradas."} ${lab && lab[0] && lab[0].uric_acid ? `Ácido úrico ${lab[0].uric_acid} mg/dl (${fdate(lab[0].date)}).` : "Sin análisis de ácido úrico."}</p>
+      <details><summary class="text-sm text-rose-300 cursor-pointer">Registrar crisis de gota</summary>
+        <div class="space-y-2 mt-2"><input id="g-joint" class="inp" placeholder="Articulación (dedo del pie, rodilla, manos...)"><input id="g-pain" inputmode="numeric" class="inp" placeholder="Dolor de 0 a 10"><input id="g-note" class="inp" placeholder="Qué comí o hice en los 3 días anteriores"><button id="g-add" class="btn bg-rose-600 w-full">Guardar crisis</button></div></details>
+      <details><summary class="text-sm text-rose-300 cursor-pointer">Registrar análisis de sangre</summary>
+        <div class="space-y-2 mt-2"><input id="l-uric" inputmode="decimal" class="inp" placeholder="Ácido úrico (mg/dl)"><input id="l-crea" inputmode="decimal" class="inp" placeholder="Creatinina (mg/dl)"><button id="l-add" class="btn bg-rose-600 w-full">Guardar análisis</button></div></details>
+    </div>
     <div class="card space-y-3"><h2 class="font-bold text-red-300">❤️ Presión arterial</h2>
       <p class="text-xs text-slate-400">Al levantarte y al acostarte. También puedes mandar la captura de Huawei Health al bot.</p>
       ${[["am", "Al levantarte"], ["pm", "Al acostarte"]].map(([m, l]) => `<div><div class="text-xs text-slate-300 mb-1">${l}</div><div class="grid grid-cols-3 gap-2">
@@ -288,6 +363,9 @@ async function viewHoy() {
   $("#date").onchange = (e) => { S.date = e.target.value || todayStr(); viewHoy(); };
   $("#fit-up").onclick = () => $("#file-fit").click();
   $("#save-day").onclick = saveDay;
+  $("#a-calc").onclick = () => { const t = $("#a-type").value, m = num($("#a-min").value); if (!t || !m) return toast("Elige actividad y minutos.", "info"); const w = S.week ? S.week.weight : 127; $("#a-kcal").value = Math.round(((MET[t] || 4) - 1) * w * (m / 60)); };
+  $("#g-add").onclick = async () => { const joint = $("#g-joint").value.trim(), pain = num($("#g-pain").value); if (!joint && pain == null) return toast("Pon articulación o dolor.", "info"); try { await q(sb.from("gout_events").insert({ user_id: S.user.id, date: S.date, joint: joint || null, pain: pain == null ? null : Math.round(pain), notes: $("#g-note").value.trim() || null })); toast("Crisis guardada", "ok"); viewHoy(); } catch (e) { toast(e.message, "err"); } };
+  $("#l-add").onclick = async () => { const u = num($("#l-uric").value), c = num($("#l-crea").value); if (u == null && c == null) return toast("Pon algún valor.", "info"); try { await q(sb.from("lab_results").insert({ user_id: S.user.id, date: S.date, uric_acid: u, creatinine: c })); toast("Análisis guardado", "ok"); viewHoy(); } catch (e) { toast(e.message, "err"); } };
   const wk = $("#wk-go"); if (wk) wk.onclick = () => go("evolucion");
 }
 
@@ -302,7 +380,7 @@ async function saveDay() {
     // Solo se aplican los cambios que hiciste tú; lo que llegó por Telegram (caminata, fuerza) no se pisa.
     const remote = await q(sb.from("daily_logs").select("habits,training").eq("date", date).maybeSingle());
     const seen = S.daily || {}, seenH = seen.habits || {};
-    const dom = { walk: (num($("#steps").value) || 0) >= S.profile.goal_steps, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked };
+    const dom = { walk: (num($("#steps").value) || 0) >= S.profile.goal_steps, hydration: $("#h-hyd").checked, meds: $("#h-meds").checked, protein: $("#h-pro").checked, screens: $("#h-scr").checked, bed: $("#h-bed").checked, read: $("#h-read").checked };
     const habits = { ...((remote && remote.habits) || {}) };
     for (const k of Object.keys(dom)) { if (!!seenH[k] !== dom[k] || habits[k] == null) habits[k] = dom[k]; }
     const trDom = $("input[name=tr]:checked").value;
@@ -318,8 +396,14 @@ async function saveDay() {
       if (sy != null && di != null) { daily[`bp_${m}_sys`] = Math.round(sy); daily[`bp_${m}_dia`] = Math.round(di); }
       if (pu != null) daily[`bp_${m}_pulse`] = Math.round(pu);
     }
+    const at = $("#a-type").value, am = num($("#a-min").value), ak = num($("#a-kcal").value);
+    daily.workout_type = at || null; if (am != null) daily.workout_min = Math.round(am); if (ak != null) daily.workout_kcal = Math.round(ak);
+    for (const [id, key] of [["#n-plan", "plan_text"], ["#n-inc", "incidents"], ["#n-day", "notes"]]) { const v = $(id).value.trim(); if (v !== String(seen[key] || "")) daily[key] = v || null; }
+    daily.active_kcal = activeKcal({ ...seen, ...daily }, S.week ? S.week.weight : 127);
     await q(sb.from("daily_logs").upsert(daily, { onConflict: "user_id,date" }));
-    S.daily = { ...(S.daily || {}), ...daily }; refreshCounter();
+    const wv = $("#n-week").value.trim();
+    await q(sb.from("weekly_notes").upsert({ user_id: uid, week_start: mondayOf(date), notes: wv || null, updated_at: new Date().toISOString() }, { onConflict: "user_id,week_start" }));
+    S.daily = { ...(S.daily || {}), ...daily }; await loadWeek(); refreshCounter();
     S.fitSource = "manual"; S.fitRaw = null;
     toast("Día guardado en la nube", "ok");
   } catch (e) { toast("No se guardó: " + e.message, "err", 6000); }
@@ -413,6 +497,7 @@ async function viewComida() {
     <div class="card"><div class="flex justify-between items-center mb-2"><h2 class="font-bold text-blue-300">Menú de <span id="menu-title">${DIAS[day]}</span></h2>
       <select id="menu-day" class="bg-slate-900 border border-slate-600 rounded p-1 text-sm">
         ${[1, 2, 3, 4, 5, 6, 0].map((i) => `<option value="${i}" ${day === i ? "selected" : ""}>${DIAS[i]}${i === new Date().getDay() ? " (hoy)" : ""}</option>`).join("")}</select></div>
+      <div class="flex items-center gap-2 mb-2 text-xs"><span class="text-slate-300">Plan:</span><select id="menu-plan" class="bg-slate-900 border border-slate-600 rounded p-1 text-sm"><option value="A" ${S.profile.diet_plan !== "B" ? "selected" : ""}>A · crisis: sin carne ni atún</option><option value="B" ${S.profile.diet_plan === "B" ? "selected" : ""}>B · sin dolor: carne el finde, atún 1 vez</option></select></div>
       <div id="menu" class="space-y-2"></div></div></section>`;
   renderMeals(); renderMenu(); renderDraft();
   $("#m-cam").onclick = () => $("#file-meal").click();
@@ -420,6 +505,7 @@ async function viewComida() {
   $("#man-ok").onclick = addManual;
   bindLabel();
   $("#m-txt").onclick = () => { const t = $("#m-text").value.trim(); if (t) runMeal({ note: t }); else toast("Escribe qué comiste."); };
+  $("#menu-plan").onchange = async (e) => { S.profile.diet_plan = e.target.value; S.profile.goal_purine_mg = e.target.value === "B" ? 250 : 150; try { await q(sb.from("profiles").update({ diet_plan: e.target.value }).eq("id", S.user.id)); } catch (err) { toast(err.message, "err"); } renderMenu(); refreshCounter(); };
   $("#menu-day").onchange = () => { $("#menu-title").textContent = DIAS[+$("#menu-day").value]; renderMenu(); };
 }
 for (const id of ["#file-meal", "#file-meal-gal"]) {
@@ -562,7 +648,7 @@ async function delMeal(id) {
 }
 function renderMenu() {
   const box = $("#menu"); if (!box) return;
-  const items = WEEKLY_MENU[$("#menu-day").value] || [];
+  const items = weeklyMenu()[$("#menu-day").value] || [];
   const labels = ["Desayuno", "Almuerzo", "Merienda", "Cena"];
   box.innerHTML = items.map((t, i) => `<div class="flex gap-2 items-start bg-slate-900 rounded-lg p-2"><div class="flex-1"><div class="text-xs text-blue-300 font-bold uppercase">${labels[i]}</div><div class="text-sm">${esc(t)}</div></div>
     <div class="flex flex-col gap-1">${MENU_MACROS[t] ? `<button data-a="${i}" class="btn bg-green-600 text-xs !py-2">Agregar</button>` : ""}<button data-m="${i}" class="btn bg-slate-700 text-xs !py-2">Estimar con IA</button></div></div>`).join("");
@@ -570,7 +656,7 @@ function renderMenu() {
   $$("[data-a]", box).forEach((b) => (b.onclick = async () => {
     const t = items[+b.dataset.a], m = MENU_MACROS[t];
     b.disabled = true;
-    await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][+b.dataset.a], t, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur });
+    await addDirect(["Desayuno", "Comida", "Merienda", "Cena"][+b.dataset.a], t, { kcal: m.kcal, p: m.p, c: m.c, f: m.f, na: m.na, pur: m.pur, pm: m.pm, fr: m.fr });
     b.disabled = false;
   }));
 }
@@ -589,7 +675,7 @@ async function addDirect(type, name, m) {
     await q(sb.from("meals").insert({
       user_id: S.user.id, log_date: S.date, meal_type: type, name: String(name).slice(0, 160), items: [],
       kcal: m.kcal || 0, protein_g: m.p || 0, carbs_g: m.c || 0, fat_g: m.f || 0, sodium_mg: m.na || 0,
-      purine_level: m.pur || null, source: "manual",
+      purine_level: m.pur || null, purine_mg: m.pm ?? null, fructose_g: m.fr ?? null, source: "manual",
     }));
     S.meals = await q(sb.from("meals").select("*").eq("log_date", S.date).order("created_at"));
     await autoProtein();
@@ -797,6 +883,7 @@ async function viewProgresoBase() {
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Peso y músculo</h3><div class="h-56"><canvas id="c1"></canvas></div></div>
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Grasa corporal %</h3><div class="h-44"><canvas id="c2"></canvas></div></div>
     <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Calorías y proteína (14 días)</h3><div class="h-52"><canvas id="c3"></canvas></div></div>
+    <div class="card"><h3 class="text-sm font-semibold text-center mb-2">Composición del sueño (30 noches)</h3><div class="h-56"><canvas id="c4"></canvas></div><p id="sl-note" class="text-xs text-slate-400 mt-1"></p></div>
     <div class="flex gap-2 noprint"><button id="csv" class="btn bg-slate-700 flex-1">Exportar CSV</button><button id="prt" class="btn bg-slate-700 flex-1">Imprimir</button></div>
     <div class="card overflow-x-auto"><table class="w-full text-sm whitespace-nowrap"><thead class="text-slate-300 text-xs uppercase"><tr><th class="text-left p-1">Fecha</th><th>Peso</th><th>% Gr</th><th>Músc</th><th>BMR</th><th>Hábitos</th></tr></thead><tbody>
       ${[...W].reverse().slice(0, 40).map((x) => { const dl = daily.find((d) => d.date === x.date); const hs = dl ? Object.values(dl.habits || {}).filter(Boolean).length : 0; return `<tr class="border-t border-slate-700 text-center"><td class="text-left p-1">${fdate(x.date)}</td><td>${x.weight_kg}</td><td>${x.body_fat_pct ?? "-"}</td><td>${x.muscle_kg ?? "-"}</td><td>${x.bmr ?? "-"}</td><td>${hs}/4</td></tr>`; }).join("")}
@@ -815,6 +902,19 @@ async function viewProgresoBase() {
     { type: "bar", label: "kcal", data: days.map((d) => Math.round(mealsAgg[d].kcal)), backgroundColor: "#64748b", yAxisID: "y" },
     { type: "line", label: "Proteína (g)", data: days.map((d) => Math.round(mealsAgg[d].p)), borderColor: "#3b82f6", yAxisID: "y1" }] },
     options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid }, y: { grid }, y1: { position: "right", grid: { drawOnChartArea: false } } }, plugins: { legend: leg } } }));
+  const sd = daily.filter((x) => x.sleep_minutes).slice(-30);
+  if (sd.length && $("#c4")) {
+    S.charts.push(new Chart($("#c4"), { data: { labels: sd.map((x) => fdate(x.date)), datasets: [
+      { type: "bar", label: "Profundo", data: sd.map((x) => x.deep_min), backgroundColor: "#4f46e5", stack: "s" },
+      { type: "bar", label: "REM", data: sd.map((x) => x.rem_min), backgroundColor: "#06b6d4", stack: "s" },
+      { type: "bar", label: "Ligero", data: sd.map((x) => x.light_min), backgroundColor: "#94a3b8", stack: "s" },
+      { type: "bar", label: "Despierto", data: sd.map((x) => x.awake_min), backgroundColor: "#f87171", stack: "s" },
+      { type: "line", label: "Puntuación", data: sd.map((x) => x.sleep_score), borderColor: "#22c55e", yAxisID: "y1" }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid, stacked: true }, y: { grid, stacked: true }, y1: { position: "right", grid: { drawOnChartArea: false }, min: 0, max: 100 } }, plugins: { legend: leg } } }));
+    const pct = (arr, k) => { const s = arr.filter((x) => x[k] != null && x.sleep_minutes); return s.length ? Math.round((s.reduce((t, x) => t + x[k] / x.sleep_minutes, 0) / s.length) * 100) : null; };
+    const last = sd.slice(-7), prev = sd.slice(-14, -7), pd = pct(last, "deep_min"), pr = pct(last, "rem_min");
+    $("#sl-note").textContent = pd != null || pr != null ? "Últimas noches: profundo " + (pd ?? "-") + " %, REM " + (pr ?? "-") + " %" + (prev.length ? " (semana anterior: profundo " + (pct(prev, "deep_min") ?? "-") + " %, REM " + (pct(prev, "rem_min") ?? "-") + " %)." : ".") : "Sin datos de fases: manda la captura de Huawei Health al bot.";
+  }
   $("#prt").onclick = () => window.print();
   $("#csv").onclick = () => {
     const cols = ["date", ...FIT.map((f) => f[0])];

@@ -159,5 +159,165 @@ export const MENU_MACROS = {
     "f": 5.8,
     "na": 673,
     "pur": "low"
+  },
+  "Café + 3 huevos revueltos + 2 tostadas integrales + 200 g de cottage 0 %": {
+    "kcal": 522,
+    "p": 48.3,
+    "c": 36.1,
+    "f": 18.5,
+    "na": 1078,
+    "pur": "low",
+    "pm": 29,
+    "fr": 0
+  },
+  "2 yogures Milsani con fruta 0 % + 200 g de skyr natural": {
+    "kcal": 248,
+    "p": 35.2,
+    "c": 24.6,
+    "f": 0.6,
+    "na": 240,
+    "pur": "low",
+    "pm": 20,
+    "fr": 2
+  },
+  "150 g de arroz basmati + 3 huevos revueltos + 150 g de setas + 200 g de brócoli + 1 loncha de edam": {
+    "kcal": 651,
+    "p": 37.7,
+    "c": 62.2,
+    "f": 28.3,
+    "na": 493,
+    "pur": "medium",
+    "pm": 60,
+    "fr": 0
+  },
+  "Media pinsa de Aldi con tomate, 30 g de provolone y 100 g de shiitake + 1 huevo duro": {
+    "kcal": 543,
+    "p": 27.6,
+    "c": 63.2,
+    "f": 19.6,
+    "na": 728,
+    "pur": "low",
+    "pm": 41,
+    "fr": 1
+  },
+  "2 porciones de tortilla de patatas de mamá + 200 g de brócoli + 1 yogur Milsani con fruta": {
+    "kcal": 804,
+    "p": 31.4,
+    "c": 88.3,
+    "f": 36.9,
+    "na": 702,
+    "pur": "low",
+    "pm": 12,
+    "fr": 1.5
+  },
+  "150 g de arroz basmati + 3 huevos + 150 g de setas + 200 g de judías verdes + 1 loncha de edam": {
+    "kcal": 651,
+    "p": 36.7,
+    "c": 62.2,
+    "f": 28.1,
+    "na": 421,
+    "pur": "medium",
+    "pm": 60,
+    "fr": 0
+  },
+  "150 g de arroz basmati + 2 huevos + 1 lata de atún al natural + mayonesa casera + 200 g de judías verdes": {
+    "kcal": 581,
+    "p": 34.1,
+    "c": 57,
+    "f": 23.2,
+    "na": 323,
+    "pur": "medium",
+    "pm": 90,
+    "fr": 0
+  },
+  "80 g de burrata con tomate + 2 huevos duros + 200 g de brócoli + 1 tostada integral": {
+    "kcal": 588,
+    "p": 32.3,
+    "c": 33.4,
+    "f": 35.8,
+    "na": 630,
+    "pur": "low",
+    "pm": 14,
+    "fr": 1
+  },
+  "Media pinsa de Aldi con tomate, 2 huevos y 100 g de shiitake + 200 g de judías verdes": {
+    "kcal": 585,
+    "p": 30,
+    "c": 77,
+    "f": 17.5,
+    "na": 545,
+    "pur": "low",
+    "pm": 41,
+    "fr": 1
+  },
+  "1 hamburguesa bio de Aldi + 150 g de arroz basmati + 200 g de judías verdes + 2 huevos duros": {
+    "kcal": 711,
+    "p": 42.9,
+    "c": 57,
+    "f": 32.7,
+    "na": 263,
+    "pur": "high",
+    "pm": 159,
+    "fr": 0
+  },
+  "Tortilla de 3 huevos con 150 g de setas + 150 g de arroz basmati + 200 g de brócoli + 1 loncha de edam": {
+    "kcal": 651,
+    "p": 37.7,
+    "c": 62.2,
+    "f": 28.3,
+    "na": 493,
+    "pur": "medium",
+    "pm": 60,
+    "fr": 0
+  },
+  "120 g de ternera magra + 150 g de arroz basmati + 200 g de brócoli + 2 huevos duros": {
+    "kcal": 621,
+    "p": 51.9,
+    "c": 57,
+    "f": 19.9,
+    "na": 305,
+    "pur": "high",
+    "pm": 159,
+    "fr": 0
+  },
+  "Cena ligera: tortilla de 1 huevo y 3 claras + 200 g de brócoli + 1 tostada integral": {
+    "kcal": 281,
+    "p": 24.6,
+    "c": 29.1,
+    "f": 7.1,
+    "na": 421,
+    "pur": "low",
+    "pm": 11,
+    "fr": 0
+  },
+  "Cena ligera: 200 g de skyr natural + 200 g de judías verdes + 1 tostada integral": {
+    "kcal": 272,
+    "p": 28.5,
+    "c": 36,
+    "f": 2,
+    "na": 214,
+    "pur": "low",
+    "pm": 10,
+    "fr": 0
+  },
+  "Cena ligera: 2 huevos duros + 200 g de judías verdes + 1 yogur Milsani con fruta": {
+    "kcal": 290,
+    "p": 23,
+    "c": 23.3,
+    "f": 11.3,
+    "na": 220,
+    "pur": "low",
+    "pm": 12,
+    "fr": 1
+  },
+  "Cena ligera: 4 claras revueltas + 150 g de setas + 200 g de brócoli + 1 tostada integral": {
+    "kcal": 253,
+    "p": 26.4,
+    "c": 33.3,
+    "f": 2.3,
+    "na": 414,
+    "pur": "low",
+    "pm": 52,
+    "fr": 0
   }
 };
